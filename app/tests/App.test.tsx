@@ -23,6 +23,23 @@ afterEach(() => {
 })
 
 describe('recipe management', () => {
+  it('opens the home screen and saves recipes and tasks when randomUUID is unavailable', () => {
+    vi.stubGlobal('crypto', { getRandomValues: crypto.getRandomValues.bind(crypto) })
+    renderApp()
+    expect(screen.getByRole('heading', { name: /マイレシピ/ })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: /新しいレシピを作る/ }))
+    fireEvent.change(screen.getByLabelText('レシピ名'), { target: { value: 'HTTP テスト' } })
+    fireEvent.click(screen.getByRole('button', { name: /ステップを追加/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'レシピを保存' }))
+    expect(screen.getByRole('heading', { name: 'HTTP テスト' })).toBeTruthy()
+    const recipes = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+    const saved = recipes[recipes.length - 1]
+    const ids = [saved.id, ...saved.tasks.map((task: { id: string }) => task.id)]
+    expect(new Set(ids).size).toBe(3)
+    for (const id of ids)
+      expect(id).toMatch(/^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/)
+  })
+
   it('reorders recipes in both directions and keeps the order after reload', () => {
     const recipes = ['朝の一杯', '昼の一杯', '夜の一杯'].map((name, index) => ({
       ...sampleRecipes[0],

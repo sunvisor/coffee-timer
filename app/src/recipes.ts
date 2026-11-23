@@ -1,3 +1,5 @@
+import { createId } from './createId'
+
 export type BrewTask = {
   id: string
   type: 'pour' | 'wait'
@@ -29,14 +31,14 @@ export const totalSeconds = (recipe: Recipe) =>
 export const totalPourAmount = (tasks: BrewTask[]) =>
   tasks.reduce((sum, task) => sum + (task.type === 'pour' ? task.amount : 0), 0)
 export const newTask = (): BrewTask => ({
-  id: crypto.randomUUID(),
+  id: createId(),
   type: 'pour',
   description: '',
   seconds: 30,
   amount: 50,
 })
 export const newRecipe = (): Recipe => ({
-  id: crypto.randomUUID(),
+  id: createId(),
   name: '',
   description: '',
   coffee: 15,
