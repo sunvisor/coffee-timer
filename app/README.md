@@ -1,35 +1,88 @@
-# React + TypeScript + Vite
+# coffee timer
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+レシピに沿ってハンドドリップを案内する、日本語のコーヒータイマーです。
+React / TypeScript / Vite / React Compiler を使用し、サーバーなしで動作します。
 
-Currently, two official plugins are available:
+## 開発
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Node.js 24 を推奨します。
 
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+cd app
+npm ci
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+表示されたローカル URL をブラウザーで開いてください。
+
+## 機能
+
+- ホームの「レシピを追加」で登録。名前、説明、粉量、湯量、湯温、準備を記録できます。
+- 抽出・待機ステップを追加、削除、上下ボタンで並べ替えできます。
+- レシピの詳細画面から編集、削除、抽出開始ができます。
+- 説明・準備・ステップの説明は Markdown と改行に対応しています。HTML は実行しません。
+- タイマーは各ステップを自動で切り替え、終了時に通知音を鳴らします。
+- 抽出中はステップの残り時間、注ぐ量の目安、スケールの累計目標を表示します。
+- 一時停止・再開と中止に対応しています。
+- 設定から JSON のバックアップと読み込みができます。
+
+初回は基本のハンドドリップレシピを表示します。
+レシピの保存先はブラウザーの localStorage（`coffee-timer.recipes.v1`）です。
+同じ端末でもブラウザーやアクセス先が異なると、保存先も異なります。
+データ削除に備え、設定から定期的にバックアップしてください。
+
+## タイマーと通知音
+
+抽出開始の操作で Web Audio を有効にします。音が利用できない場合は画面に表示します。
+端末の音量を確認し、抽出中は画面を開いたまま使用してください。
+バックグラウンドやスリープ中の音声通知は保証されません。
+タイマーのコールバックが遅れた場合、再実行時に経過時間から現在のステップへ追従します。
+
+ステップの時間は 1〜86400 秒の整数、抽出量は正の数で指定します。
+待機ステップには注湯量を設定しません。湯温は 0℃ より大きく 100℃ 以下です。
+
+## バックアップ形式
+
+JSON のトップレベルはレシピの配列です。各レシピは以下の項目を持ちます。
+
+```json
+[
+  {
+    "id": "my-recipe",
+    "name": "一杯分",
+    "description": "**いつものレシピ**\n中細挽き",
+    "coffee": 15,
+    "water": 250,
+    "temperature": 92,
+    "preparation": "フィルターをリンスする",
+    "tasks": [
+      { "id": "pour-1", "type": "pour", "description": "お湯を注ぐ", "seconds": 30, "amount": 250 },
+      {
+        "id": "wait-1",
+        "type": "wait",
+        "description": "落ちきるまで待つ",
+        "seconds": 60,
+        "amount": 0
+      }
+    ]
+  }
+]
+```
+
+読み込みは現在の一覧を置き換えます。確認ダイアログを表示し、形式を検証してから保存します。
+レシピ ID は一覧内、タスク ID は各レシピ内で一意にしてください。
+空の配列も読み込みできます。ファイルサイズは 5 MB 以下です。
+
+## 検証とビルド
+
+```sh
+npm test
+npm run lint
+npm run build
+npm run preview
+```
+
+テストは Vitest / Testing Library / jsdom を使用します。
+`npm run build` は TypeScript の型チェックと本番ビルドを実行します。
+生成された `app/dist` は静的ファイル一式で、Cloudflare へのデプロイ用成果物になります。
+現段階ではデプロイ設定や公開は行っていません。
