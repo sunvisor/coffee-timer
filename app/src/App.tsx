@@ -9,12 +9,9 @@ import { RecipeStats, RecipeView } from './RecipeView'
 import { Settings } from './Settings'
 import { newRecipe, type Recipe } from './recipes'
 import { useRecipes } from './useRecipes'
+import { useScreen } from './useScreen'
+import type { Screen } from './screens'
 import './App.css'
-
-type Screen =
-  | { type: 'home' | 'settings' | 'order' }
-  | { type: 'detail' | 'edit'; recipe: Recipe }
-  | { type: 'brew'; recipe: Recipe; audio: AudioContext | null }
 
 function Home({
   recipes,
@@ -87,18 +84,18 @@ function Home({
 
 function App() {
   const { recipes, error, save } = useRecipes()
-  const [screen, setScreen] = useState<Screen>({ type: 'home' })
+  const { screen, setScreen } = useScreen(recipes)
   const [audioError, setAudioError] = useState('')
   const add = () => setScreen({ type: 'edit', recipe: newRecipe() })
   const detail = (recipe: Recipe) => setScreen({ type: 'detail', recipe })
   function saveOrder(ordered: Recipe[]) {
-    if (save(ordered)) setScreen({ type: 'home' })
+    if (save(ordered)) setScreen({ type: 'home' }, { replace: true })
   }
   function saveRecipe(recipe: Recipe) {
     const updated = recipes.some((item) => item.id === recipe.id)
       ? recipes.map((item) => (item.id === recipe.id ? recipe : item))
       : [...recipes, recipe]
-    if (save(updated)) detail(recipe)
+    if (save(updated)) setScreen({ type: 'detail', recipe }, { replace: true })
   }
   async function start(recipe: Recipe) {
     setAudioError('')
@@ -112,14 +109,14 @@ function App() {
   }
   function exitBrew(next: Screen, audio: AudioContext | null) {
     if (audio) void audio.close()
-    setScreen(next)
+    setScreen(next, { replace: true })
   }
   function remove(recipe: Recipe) {
     if (
       window.confirm(`「${recipe.name}」を削除しますか？`) &&
       save(recipes.filter((item) => item.id !== recipe.id))
     )
-      setScreen({ type: 'home' })
+      setScreen({ type: 'home' }, { replace: true })
   }
   return (
     <div className="app-shell">
@@ -176,7 +173,7 @@ function App() {
           <RecipeOrder
             recipes={recipes}
             onSave={saveOrder}
-            onCancel={() => setScreen({ type: 'home' })}
+            onCancel={() => setScreen({ type: 'home' }, { replace: true })}
           />
         )}
         {screen.type === 'detail' && (
@@ -202,7 +199,7 @@ function App() {
               key={screen.recipe.id}
               initial={screen.recipe}
               onSave={saveRecipe}
-              onCancel={() => setScreen({ type: 'home' })}
+              onCancel={() => setScreen({ type: 'home' }, { replace: true })}
             />
           </>
         )}
@@ -214,6 +211,12 @@ function App() {
             </div>
             <Settings recipes={recipes} onImport={save} />
           </>
+        )}
+        {screen.type === 'not-found' && (
+          <section className="panel">
+            <h1>ページが見つかりません</h1>
+            <p>レシピが削除されたか、URL が正しくありません。ホームから選び直してください。</p>
+          </section>
         )}
         {screen.type === 'brew' && (
           <Brew
