@@ -386,8 +386,9 @@ main {
 .detail-footer {
   justify-content: space-between;
 }
-.detail-footer .primary {
+.detail-start {
   min-width: 220px;
+  margin-top: 24px;
 }
 .danger {
   color: #9a4235;
@@ -648,8 +649,8 @@ main {
     flex-direction: column;
     gap: 16px;
   }
-  .detail-footer .primary {
-    min-width: 150px;
+  .detail-start {
+    width: 100%;
   }
   .recipe-stats {
     gap: 6px;

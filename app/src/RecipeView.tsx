@@ -50,6 +50,9 @@ export function RecipeView({
         <span className="eyebrow">YOUR BREW RECIPE</span>
         <h1>{recipe.name}</h1>
         <Markdown>{recipe.description}</Markdown>
+        <button className="primary detail-start" onClick={onStart}>
+          抽出開始
+        </button>
       </div>
       <RecipeStats recipe={recipe} />
       <section className="panel">
@@ -93,9 +96,6 @@ export function RecipeView({
             削除
           </button>
         </div>
-        <button className="primary" onClick={onStart}>
-          抽出開始
-        </button>
       </div>
     </>
   )
