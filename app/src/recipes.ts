@@ -26,6 +26,8 @@ export function formatTime(seconds: number) {
 }
 export const totalSeconds = (recipe: Recipe) =>
   recipe.tasks.reduce((sum, task) => sum + task.seconds, 0)
+export const totalPourAmount = (tasks: BrewTask[]) =>
+  tasks.reduce((sum, task) => sum + (task.type === 'pour' ? task.amount : 0), 0)
 export const newTask = (): BrewTask => ({
   id: crypto.randomUUID(),
   type: 'pour',

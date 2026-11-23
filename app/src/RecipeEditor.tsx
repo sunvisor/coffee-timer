@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { newTask, type BrewTask, type Recipe } from './recipes'
+import { WaterAmountWarning } from './WaterAmountWarning'
 
 type Props = { initial: Recipe; onSave: (recipe: Recipe) => void; onCancel: () => void }
 type NumberFieldProps = {
@@ -201,6 +202,7 @@ export function RecipeEditor({ initial, onSave, onCancel }: Props) {
       >
         ＋ ステップを追加
       </button>
+      <WaterAmountWarning recipe={recipe} />
       <div className="form-footer actions">
         <button type="button" onClick={onCancel}>
           キャンセル

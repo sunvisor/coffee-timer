@@ -131,6 +131,16 @@ label {
   color: #345b3e;
   padding-top: 16px;
 }
+.water-warning {
+  padding: 16px;
+  border: 1px solid #d3ae66;
+  border-radius: 8px;
+  background: #fff5df;
+  color: #77521d;
+}
+.detail-intro .water-warning {
+  margin-top: 20px;
+}
 .markdown {
   overflow-wrap: anywhere;
 }

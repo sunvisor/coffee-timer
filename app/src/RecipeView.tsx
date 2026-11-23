@@ -1,5 +1,6 @@
 import { Markdown } from './Markdown'
-import { formatTime, totalSeconds, type Recipe } from './recipes'
+import { formatTime, totalPourAmount, totalSeconds, type Recipe } from './recipes'
+import { WaterAmountWarning } from './WaterAmountWarning'
 
 export function RecipeStats({ recipe }: { recipe: Recipe }) {
   return (
@@ -50,6 +51,7 @@ export function RecipeView({
         <span className="eyebrow">YOUR BREW RECIPE</span>
         <h1>{recipe.name}</h1>
         <Markdown>{recipe.description}</Markdown>
+        <WaterAmountWarning recipe={recipe} />
         <button className="primary detail-start" onClick={onStart}>
           抽出開始
         </button>
@@ -66,9 +68,7 @@ export function RecipeView({
         </div>
         <ol className="steps">
           {recipe.tasks.map((task, index) => {
-            const amount = recipe.tasks
-              .slice(0, index + 1)
-              .reduce((sum, item) => sum + (item.type === 'pour' ? item.amount : 0), 0)
+            const amount = totalPourAmount(recipe.tasks.slice(0, index + 1))
             return (
               <li key={task.id}>
                 <span className={`step-number ${task.type}`}>
