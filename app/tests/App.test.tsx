@@ -14,6 +14,69 @@ afterEach(() => {
 })
 
 describe('recipe management', () => {
+  it('reorders recipes in both directions and keeps the order after reload', () => {
+    const recipes = ['朝の一杯', '昼の一杯', '夜の一杯'].map((name, index) => ({
+      ...sampleRecipes[0],
+      id: `recipe-${index}`,
+      name,
+    }))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes))
+    const app = render(<App />)
+    const names = () =>
+      screen.getAllByRole('article').map((card) => within(card).getByRole('heading').textContent)
+    expect(screen.queryByRole('button', { name: '朝の一杯を上へ' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: '並べ替え' }))
+    const orderedNames = () =>
+      screen.getAllByRole('listitem').map((item) => within(item).getByText(/の一杯$/).textContent)
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '朝の一杯を上へ' }).disabled).toBe(
+      true,
+    )
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '夜の一杯を下へ' }).disabled).toBe(
+      true,
+    )
+    fireEvent.click(screen.getByRole('button', { name: '昼の一杯を上へ' }))
+    expect(orderedNames()).toEqual(['昼の一杯', '朝の一杯', '夜の一杯'])
+    fireEvent.click(screen.getByRole('button', { name: '朝の一杯を下へ' }))
+    expect(orderedNames()).toEqual(['昼の一杯', '夜の一杯', '朝の一杯'])
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(JSON.stringify(recipes))
+    fireEvent.click(screen.getByRole('button', { name: '順序を保存' }))
+    expect(names()).toEqual(['昼の一杯', '夜の一杯', '朝の一杯'])
+    app.unmount()
+    render(<App />)
+    expect(names()).toEqual(['昼の一杯', '夜の一杯', '朝の一杯'])
+  })
+
+  it('keeps recipe order and stored data if reordering cannot be saved', () => {
+    const recipes = [sampleRecipes[0], { ...sampleRecipes[0], id: 'second', name: '別のレシピ' }]
+    const stored = JSON.stringify(recipes)
+    localStorage.setItem(STORAGE_KEY, stored)
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('Quota exceeded')
+    })
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: '並べ替え' }))
+    fireEvent.click(screen.getByRole('button', { name: '別のレシピを上へ' }))
+    fireEvent.click(screen.getByRole('button', { name: '順序を保存' }))
+    expect(screen.getByRole('alert').textContent).toContain('保存できませんでした')
+    expect(screen.getByRole('heading', { name: 'レシピの並べ替え' })).toBeTruthy()
+    expect(within(screen.getAllByRole('listitem')[0]).getByText('別のレシピ')).toBeTruthy()
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(stored)
+  })
+
+  it('discards unsaved order changes when cancelling', () => {
+    const recipes = [sampleRecipes[0], { ...sampleRecipes[0], id: 'second', name: '別のレシピ' }]
+    const stored = JSON.stringify(recipes)
+    localStorage.setItem(STORAGE_KEY, stored)
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: '並べ替え' }))
+    fireEvent.click(screen.getByRole('button', { name: '別のレシピを上へ' }))
+    fireEvent.click(screen.getByRole('button', { name: 'キャンセル' }))
+    expect(
+      screen.getAllByRole('article').map((card) => within(card).getByRole('heading').textContent),
+    ).toEqual(recipes.map((recipe) => recipe.name))
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(stored)
+  })
+
   it('creates a recipe, reorders tasks, persists edits, and reloads it', () => {
     const app = render(<App />)
     fireEvent.click(screen.getByRole('button', { name: /新しいレシピを作る/ }))
@@ -149,7 +212,9 @@ describe('brewing interaction', () => {
     act(() => vi.advanceTimersByTime(1000))
     expect(screen.getByRole('timer').textContent).toBe('00:29')
     fireEvent.click(screen.getByRole('button', { name: 'スキップ' }))
-    expect(screen.getByText('スケールの表示の目安（累計）').parentElement?.textContent).toContain('30 / 150 g')
+    expect(screen.getByText('スケールの表示の目安（累計）').parentElement?.textContent).toContain(
+      '30 / 150 g',
+    )
   })
 
   it('preserves pause when skipping and resumes from the new step', () => {
@@ -214,7 +279,14 @@ describe('brewing interaction', () => {
       destination: {},
     }
     // jsdom has no Web Audio implementation; only the used audio methods are simulated.
-    render(<Brew recipe={recipe} audio={audio as unknown as AudioContext} onExit={vi.fn()} onHome={vi.fn()} />)
+    render(
+      <Brew
+        recipe={recipe}
+        audio={audio as unknown as AudioContext}
+        onExit={vi.fn()}
+        onHome={vi.fn()}
+      />,
+    )
     act(() => vi.advanceTimersByTime(1000))
     expect(screen.getByRole('timer').textContent).toBe('00:01')
     fireEvent.click(screen.getByRole('button', { name: '一時停止' }))

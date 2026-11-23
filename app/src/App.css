@@ -258,6 +258,46 @@ main {
   padding: 0;
   background: none;
 }
+.recipe-sort-list {
+  list-style: decimal;
+  margin: 0 0 24px;
+  padding-left: 24px;
+}
+.recipe-sort-list li {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.recipe-sort-list li > span {
+  overflow-wrap: anywhere;
+}
+.recipe-sort-list .recipe-order {
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+.recipe-sort-link {
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+}
+.recipe-order {
+  display: flex;
+  gap: 8px;
+}
+.recipe-order button {
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+}
+.order-button {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+.order-button svg {
+  width: 20px;
+  height: 20px;
+}
 .new-recipe-card {
   display: flex;
   flex-direction: column;

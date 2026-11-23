@@ -3,6 +3,7 @@ import { Brew } from './Brew'
 import { prepareAudio } from './audio'
 import { Markdown } from './Markdown'
 import { RecipeEditor } from './RecipeEditor'
+import { RecipeOrder } from './RecipeOrder'
 import { RecipeStats, RecipeView } from './RecipeView'
 import { Settings } from './Settings'
 import { newRecipe, type Recipe } from './recipes'
@@ -10,7 +11,7 @@ import { useRecipes } from './useRecipes'
 import './App.css'
 
 type Screen =
-  | { type: 'home' | 'settings' }
+  | { type: 'home' | 'settings' | 'order' }
   | { type: 'detail' | 'edit'; recipe: Recipe }
   | { type: 'brew'; recipe: Recipe; audio: AudioContext | null }
 
@@ -18,10 +19,12 @@ function Home({
   recipes,
   onSelect,
   onAdd,
+  onOrder,
 }: {
   recipes: Recipe[]
   onSelect: (recipe: Recipe) => void
   onAdd: () => void
+  onOrder: () => void
 }) {
   return (
     <>
@@ -45,7 +48,11 @@ function Home({
         <h2>
           マイレシピ <span className="count-badge">{recipes.length}</span>
         </h2>
-        <span>あなた好みの一杯を、ここから。</span>
+        {recipes.length > 1 && (
+          <button className="recipe-sort-link" onClick={onOrder}>
+            並べ替え
+          </button>
+        )}
       </div>
       <div className="recipe-grid">
         {recipes.map((recipe, index) => (
@@ -83,6 +90,9 @@ function App() {
   const [audioError, setAudioError] = useState('')
   const add = () => setScreen({ type: 'edit', recipe: newRecipe() })
   const detail = (recipe: Recipe) => setScreen({ type: 'detail', recipe })
+  function saveOrder(ordered: Recipe[]) {
+    if (save(ordered)) setScreen({ type: 'home' })
+  }
   function saveRecipe(recipe: Recipe) {
     const updated = recipes.some((item) => item.id === recipe.id)
       ? recipes.map((item) => (item.id === recipe.id ? recipe : item))
@@ -153,7 +163,21 @@ function App() {
             {audioError}
           </p>
         )}
-        {screen.type === 'home' && <Home recipes={recipes} onSelect={detail} onAdd={add} />}
+        {screen.type === 'home' && (
+          <Home
+            recipes={recipes}
+            onSelect={detail}
+            onAdd={add}
+            onOrder={() => setScreen({ type: 'order' })}
+          />
+        )}
+        {screen.type === 'order' && (
+          <RecipeOrder
+            recipes={recipes}
+            onSave={saveOrder}
+            onCancel={() => setScreen({ type: 'home' })}
+          />
+        )}
         {screen.type === 'detail' && (
           <RecipeView
             recipe={screen.recipe}

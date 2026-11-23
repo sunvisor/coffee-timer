@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { newTask, type BrewTask, type Recipe } from './recipes'
 import { WaterAmountWarning } from './WaterAmountWarning'
+import { OrderButton } from './OrderButton'
 
 type Props = { initial: Recipe; onSave: (recipe: Recipe) => void; onCancel: () => void }
 type NumberFieldProps = {
@@ -61,22 +62,18 @@ function TaskEditor({
           </select>
         </label>
         <div className="actions">
-          <button
-            type="button"
+          <OrderButton
+            direction="up"
             disabled={index === 0}
             onClick={() => onMove(-1)}
-            aria-label={`タスク${index + 1}を上へ`}
-          >
-            ↑
-          </button>
-          <button
-            type="button"
+            label={`タスク${index + 1}を上へ`}
+          />
+          <OrderButton
+            direction="down"
             disabled={index === count - 1}
             onClick={() => onMove(1)}
-            aria-label={`タスク${index + 1}を下へ`}
-          >
-            ↓
-          </button>
+            label={`タスク${index + 1}を下へ`}
+          />
           <button type="button" disabled={count === 1} onClick={onRemove}>
             削除
           </button>
