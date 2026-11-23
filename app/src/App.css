@@ -485,7 +485,7 @@ main {
 .timer-controls {
   position: relative;
   width: min(100%, 276px);
-  margin: 0 auto;
+  margin: 16px auto;
 }
 .timer-control {
   position: absolute;
@@ -507,17 +507,17 @@ main {
   fill: currentColor;
 }
 .timer-stop {
-  top: 0;
-  left: 0;
+  top: -12px;
+  left: -12px;
 }
 .timer-pause {
-  top: 0;
-  right: 0;
+  top: -12px;
+  right: -12px;
   color: var(--accent);
 }
 .timer-skip {
-  bottom: 0;
-  left: 0;
+  bottom: -12px;
+  left: -12px;
 }
 .timer-ring {
   border-radius: 50%;
