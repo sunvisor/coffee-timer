@@ -1,13 +1,22 @@
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../src/App'
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { Brew } from '../src/Brew'
 import { Settings } from '../src/Settings'
 import { sampleRecipes, STORAGE_KEY } from '../src/recipes'
 
+const routers: ReturnType<typeof createMemoryRouter>[] = []
+function renderApp() {
+  const router = createMemoryRouter([{ path: '*', Component: App }])
+  routers.push(router)
+  return render(<RouterProvider router={router} />)
+}
+
 beforeEach(() => localStorage.clear())
 afterEach(() => {
   cleanup()
+  routers.splice(0).forEach((router) => router.dispose())
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
   vi.useRealTimers()
@@ -21,7 +30,7 @@ describe('recipe management', () => {
       name,
     }))
     localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes))
-    const app = render(<App />)
+    const app = renderApp()
     const names = () =>
       screen.getAllByRole('article').map((card) => within(card).getByRole('heading').textContent)
     expect(screen.queryByRole('button', { name: '朝の一杯を上へ' })).toBeNull()
@@ -42,7 +51,7 @@ describe('recipe management', () => {
     fireEvent.click(screen.getByRole('button', { name: '順序を保存' }))
     expect(names()).toEqual(['昼の一杯', '夜の一杯', '朝の一杯'])
     app.unmount()
-    render(<App />)
+    renderApp()
     expect(names()).toEqual(['昼の一杯', '夜の一杯', '朝の一杯'])
   })
 
@@ -53,7 +62,7 @@ describe('recipe management', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new DOMException('Quota exceeded')
     })
-    render(<App />)
+    renderApp()
     fireEvent.click(screen.getByRole('button', { name: '並べ替え' }))
     fireEvent.click(screen.getByRole('button', { name: '別のレシピを上へ' }))
     fireEvent.click(screen.getByRole('button', { name: '順序を保存' }))
@@ -67,7 +76,7 @@ describe('recipe management', () => {
     const recipes = [sampleRecipes[0], { ...sampleRecipes[0], id: 'second', name: '別のレシピ' }]
     const stored = JSON.stringify(recipes)
     localStorage.setItem(STORAGE_KEY, stored)
-    render(<App />)
+    renderApp()
     fireEvent.click(screen.getByRole('button', { name: '並べ替え' }))
     fireEvent.click(screen.getByRole('button', { name: '別のレシピを上へ' }))
     fireEvent.click(screen.getByRole('button', { name: 'キャンセル' }))
@@ -78,7 +87,7 @@ describe('recipe management', () => {
   })
 
   it('creates a recipe, reorders tasks, persists edits, and reloads it', () => {
-    const app = render(<App />)
+    const app = renderApp()
     fireEvent.click(screen.getByRole('button', { name: /新しいレシピを作る/ }))
     fireEvent.change(screen.getByLabelText('レシピ名'), { target: { value: '朝の一杯' } })
     fireEvent.click(screen.getByRole('button', { name: /ステップを追加/ }))
@@ -96,20 +105,20 @@ describe('recipe management', () => {
     fireEvent.change(screen.getByLabelText('レシピ名'), { target: { value: '休日の一杯' } })
     fireEvent.click(screen.getByRole('button', { name: 'レシピを保存' }))
     app.unmount()
-    render(<App />)
+    renderApp()
     expect(screen.getByRole('button', { name: '休日の一杯' })).toBeTruthy()
   })
 
   it('does not overwrite corrupted storage on startup', () => {
     localStorage.setItem(STORAGE_KEY, '{broken')
-    render(<App />)
+    renderApp()
     expect(screen.getByRole('alert').textContent).toContain('保存データを読み込めませんでした')
     expect(localStorage.getItem(STORAGE_KEY)).toBe('{broken')
   })
 
   it('deletes only after confirmation and persists an empty list', () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
-    render(<App />)
+    renderApp()
     fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
     fireEvent.click(screen.getByRole('button', { name: '削除' }))
     expect(screen.getByRole('button', { name: '抽出開始' })).toBeTruthy()
@@ -123,7 +132,7 @@ describe('recipe management', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new DOMException('Quota exceeded')
     })
-    render(<App />)
+    renderApp()
     fireEvent.click(screen.getByRole('button', { name: /新しいレシピを作る/ }))
     fireEvent.change(screen.getByLabelText('レシピ名'), { target: { value: '保存できないレシピ' } })
     fireEvent.click(screen.getByRole('button', { name: 'レシピを保存' }))
@@ -138,7 +147,7 @@ describe('recipe management', () => {
         { ...sampleRecipes[0], description: '**太字**\n次の行\n<script>alert(1)</script>' },
       ]),
     )
-    const { container } = render(<App />)
+    const { container } = renderApp()
     expect(container.querySelector('strong')?.textContent).toBe('太字')
     expect(container.querySelector('.markdown br')).toBeTruthy()
     expect(container.querySelector('script')).toBeNull()
@@ -231,7 +240,7 @@ describe('brewing interaction', () => {
   })
 
   it('completes after skipping the last step and returns to home', async () => {
-    render(<App />)
+    renderApp()
     fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
     await act(async () => fireEvent.click(screen.getByRole('button', { name: '抽出開始' })))
     for (let index = 0; index < sampleRecipes[0].tasks.length; index++) {
