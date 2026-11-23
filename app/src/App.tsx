@@ -99,9 +99,9 @@ function App() {
     }
     setScreen({ type: 'brew', recipe, audio })
   }
-  function exitBrew(recipe: Recipe, audio: AudioContext | null) {
+  function exitBrew(next: Screen, audio: AudioContext | null) {
     if (audio) void audio.close()
-    detail(recipe)
+    setScreen(next)
   }
   function remove(recipe: Recipe) {
     if (
@@ -197,7 +197,8 @@ function App() {
           <Brew
             recipe={screen.recipe}
             audio={screen.audio}
-            onExit={() => exitBrew(screen.recipe, screen.audio)}
+            onExit={() => exitBrew({ type: 'detail', recipe: screen.recipe }, screen.audio)}
+            onHome={() => exitBrew({ type: 'home' }, screen.audio)}
           />
         )}
       </main>

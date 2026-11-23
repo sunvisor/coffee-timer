@@ -139,9 +139,48 @@ describe('backup import', () => {
 })
 
 describe('brewing interaction', () => {
+  it('skips to the next step and keeps the running clock aligned', () => {
+    vi.useFakeTimers()
+    render(<Brew recipe={sampleRecipes[0]} audio={null} onExit={vi.fn()} onHome={vi.fn()} />)
+    act(() => vi.advanceTimersByTime(5000))
+    fireEvent.click(screen.getByRole('button', { name: 'スキップ' }))
+    expect(screen.getByRole('status').textContent).toBe('ゆっくり待ちましょう')
+    expect(screen.getByRole('timer').textContent).toBe('00:30')
+    act(() => vi.advanceTimersByTime(1000))
+    expect(screen.getByRole('timer').textContent).toBe('00:29')
+    fireEvent.click(screen.getByRole('button', { name: 'スキップ' }))
+    expect(screen.getByText('スケールの表示の目安（累計）').parentElement?.textContent).toContain('30 / 150 g')
+  })
+
+  it('preserves pause when skipping and resumes from the new step', () => {
+    vi.useFakeTimers()
+    render(<Brew recipe={sampleRecipes[0]} audio={null} onExit={vi.fn()} onHome={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: '一時停止' }))
+    fireEvent.click(screen.getByRole('button', { name: 'スキップ' }))
+    act(() => vi.advanceTimersByTime(5000))
+    expect(screen.getByRole('timer').textContent).toBe('00:30')
+    expect(screen.getByRole('status').textContent).toBe('一時停止中')
+    fireEvent.click(screen.getByRole('button', { name: '再開する' }))
+    act(() => vi.advanceTimersByTime(1000))
+    expect(screen.getByRole('timer').textContent).toBe('00:29')
+  })
+
+  it('completes after skipping the last step and returns to home', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: '抽出開始' })))
+    for (let index = 0; index < sampleRecipes[0].tasks.length; index++) {
+      fireEvent.click(screen.getByRole('button', { name: 'スキップ' }))
+    }
+    expect(screen.getByRole('heading', { name: '美味しいコーヒーをどうぞ。' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'レシピに戻る' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'ホームに戻る' }))
+    expect(screen.getByRole('heading', { name: /マイレシピ/ })).toBeTruthy()
+  })
+
   it('shows cumulative scale amounts across pours and waiting steps', () => {
     vi.useFakeTimers()
-    render(<Brew recipe={sampleRecipes[0]} audio={null} onExit={vi.fn()} />)
+    render(<Brew recipe={sampleRecipes[0]} audio={null} onExit={vi.fn()} onHome={vi.fn()} />)
     const scale = () => screen.getByText('スケールの表示の目安（累計）').parentElement!
     expect(within(scale()).getByRole('strong').textContent).toBe('0 / 30 g')
     act(() => vi.advanceTimersByTime(40000))
@@ -175,7 +214,7 @@ describe('brewing interaction', () => {
       destination: {},
     }
     // jsdom has no Web Audio implementation; only the used audio methods are simulated.
-    render(<Brew recipe={recipe} audio={audio as unknown as AudioContext} onExit={vi.fn()} />)
+    render(<Brew recipe={recipe} audio={audio as unknown as AudioContext} onExit={vi.fn()} onHome={vi.fn()} />)
     act(() => vi.advanceTimersByTime(1000))
     expect(screen.getByRole('timer').textContent).toBe('00:01')
     fireEvent.click(screen.getByRole('button', { name: '一時停止' }))

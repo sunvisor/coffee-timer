@@ -22,19 +22,27 @@ function useBrew(recipe: Recipe, audio: AudioContext | null) {
     if (progress.index > clock.current.previous && audio) ring(audio)
     clock.current.previous = progress.index
   }, [progress.index, audio])
-  return { elapsed, paused, setPaused, progress, done }
+  function skip() {
+    const next = recipe.tasks.slice(0, progress.index + 1).reduce((sum, task) => sum + task.seconds, 0)
+    clock.current.elapsed = next
+    clock.current.start = Date.now() - next * 1000
+    setElapsed(next)
+  }
+  return { elapsed, paused, setPaused, progress, done, skip }
 }
 
 export function Brew({
   recipe,
   audio,
   onExit,
+  onHome,
 }: {
   recipe: Recipe
   audio: AudioContext | null
   onExit: () => void
+  onHome: () => void
 }) {
-  const { elapsed, paused, setPaused, progress, done } = useBrew(recipe, audio)
+  const { elapsed, paused, setPaused, progress, done, skip } = useBrew(recipe, audio)
   const task = recipe.tasks[progress.index]
   if (done)
     return (
@@ -50,9 +58,10 @@ export function Brew({
           {recipe.coffee} g のコーヒー · {recipe.water} ml のお湯 ·{' '}
           {formatTime(totalSeconds(recipe))}
         </p>
-        <button className="primary" onClick={onExit}>
-          レシピに戻る
-        </button>
+        <div className="actions completion-actions">
+          <button className="primary" onClick={onExit}>レシピに戻る</button>
+          <button onClick={onHome}>ホームに戻る</button>
+        </div>
       </section>
     )
   return (
@@ -112,6 +121,7 @@ export function Brew({
           {paused ? '再開する' : '一時停止'}
         </button>
       </div>
+      <button className="skip-button" onClick={skip}>スキップ</button>
       <p className="muted">
         ステップは自動で切り替わります。通知音が聞こえる音量にし、この画面を開いたままお使いください。
       </p>

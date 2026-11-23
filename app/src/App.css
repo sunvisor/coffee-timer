@@ -547,7 +547,20 @@ main {
 }
 .brew-actions {
   justify-content: center;
-  margin-bottom: 26px;
+  margin-bottom: 8px;
+}
+.skip-button {
+  display: block;
+  margin: 0 auto 22px;
+  padding: 8px 16px;
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.completion-actions {
+  justify-content: center;
+  flex-wrap: wrap;
 }
 .brew-actions button {
   min-width: 150px;
