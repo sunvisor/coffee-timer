@@ -330,6 +330,7 @@ main {
 }
 .site-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   border-top: 1px solid var(--border);
   padding: 24px 0;
@@ -340,6 +341,10 @@ main {
 .site-footer > span:first-child {
   font-family: Georgia, serif;
   font-size: 1rem;
+}
+.site-footer small {
+  margin-left: 8px;
+  font: 0.75rem system-ui, sans-serif;
 }
 .back-button {
   margin: 24px 0;

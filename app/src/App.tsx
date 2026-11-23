@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { version } from '../package.json'
 import { Brew } from './Brew'
 import { prepareAudio } from './audio'
 import { Markdown } from './Markdown'
@@ -224,7 +225,9 @@ function App() {
         )}
       </main>
       <footer className="site-footer">
-        <span>coffee timer</span>
+        <span>
+          coffee timer <small>v{version}</small>
+        </span>
         <span>ゆっくり淹れる、豊かな時間。</span>
       </footer>
     </div>
