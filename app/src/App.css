@@ -482,10 +482,47 @@ main {
   font-size: 1.4rem;
   margin: 30px 0 24px;
 }
+.timer-controls {
+  position: relative;
+  width: min(100%, 276px);
+  margin: 0 auto;
+}
+.timer-control {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 11px;
+  border-radius: 50%;
+  background: white;
+  color: var(--muted);
+  box-shadow: 0 2px 6px #302e2a0d;
+  touch-action: manipulation;
+}
+.timer-control svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+.timer-stop {
+  top: 0;
+  left: 0;
+}
+.timer-pause {
+  top: 0;
+  right: 0;
+  color: var(--accent);
+}
+.timer-skip {
+  bottom: 0;
+  left: 0;
+}
 .timer-ring {
   border-radius: 50%;
-  width: 276px;
-  height: 276px;
+  width: 100%;
+  aspect-ratio: 1;
   padding: 8px;
   margin: 0 auto;
   background: conic-gradient(var(--accent) var(--progress), #eeebe5 0);
@@ -546,25 +583,9 @@ main {
     monospace;
   margin: 24px 0;
 }
-.brew-actions {
-  justify-content: center;
-  margin-bottom: 8px;
-}
-.skip-button {
-  display: block;
-  margin: 0 auto 22px;
-  padding: 8px 16px;
-  background: transparent;
-  border-color: transparent;
-  color: var(--muted);
-  font-size: 0.875rem;
-}
 .completion-actions {
   justify-content: center;
   flex-wrap: wrap;
-}
-.brew-actions button {
-  min-width: 150px;
 }
 .completion {
   margin-top: 60px;
@@ -676,13 +697,8 @@ main {
   .brew {
     padding-inline: 16px;
   }
-  .brew-actions button {
-    min-width: 0;
-    flex: 1;
-  }
-  .timer-ring {
-    width: 250px;
-    height: 250px;
+  .timer-controls {
+    max-width: 250px;
   }
   .countdown {
     font-size: 3.7rem;

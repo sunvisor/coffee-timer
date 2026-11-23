@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Markdown } from './Markdown'
+import { BrewControls } from './BrewControls'
 import { ring } from './audio'
 import { formatTime, getBrewProgress, totalSeconds, type Recipe } from './recipes'
 
@@ -23,7 +24,9 @@ function useBrew(recipe: Recipe, audio: AudioContext | null) {
     clock.current.previous = progress.index
   }, [progress.index, audio])
   function skip() {
-    const next = recipe.tasks.slice(0, progress.index + 1).reduce((sum, task) => sum + task.seconds, 0)
+    const next = recipe.tasks
+      .slice(0, progress.index + 1)
+      .reduce((sum, task) => sum + task.seconds, 0)
     clock.current.elapsed = next
     clock.current.start = Date.now() - next * 1000
     setElapsed(next)
@@ -59,7 +62,9 @@ export function Brew({
           {formatTime(totalSeconds(recipe))}
         </p>
         <div className="actions completion-actions">
-          <button className="primary" onClick={onExit}>レシピに戻る</button>
+          <button className="primary" onClick={onExit}>
+            レシピに戻る
+          </button>
           <button onClick={onHome}>ホームに戻る</button>
         </div>
       </section>
@@ -80,16 +85,26 @@ export function Brew({
             ? 'お湯を注ぎましょう'
             : 'ゆっくり待ちましょう'}
       </div>
-      <div
-        className="timer-ring"
-        style={{ '--progress': `${progress.progress * 360}deg` } as CSSProperties}
-      >
-        <div>
-          <span className="muted">このステップの残り時間</span>
-          <strong className="countdown" role="timer">
-            {formatTime(progress.remaining)}
-          </strong>
-          <small> / {formatTime(task.seconds)}</small>
+      <div className="timer-controls">
+        <BrewControls
+          paused={paused}
+          onStop={() => {
+            if (window.confirm('抽出を終了してレシピに戻りますか？')) onExit()
+          }}
+          onPause={() => setPaused(!paused)}
+          onSkip={skip}
+        />
+        <div
+          className="timer-ring"
+          style={{ '--progress': `${progress.progress * 360}deg` } as CSSProperties}
+        >
+          <div>
+            <span className="muted">このステップの残り時間</span>
+            <strong className="countdown" role="timer">
+              {formatTime(progress.remaining)}
+            </strong>
+            <small> / {formatTime(task.seconds)}</small>
+          </div>
         </div>
       </div>
       {task.type === 'pour' ? (
@@ -109,19 +124,6 @@ export function Brew({
         全体 {formatTime(Math.min(Math.floor(elapsed), totalSeconds(recipe)))} /{' '}
         {formatTime(totalSeconds(recipe))}
       </div>
-      <div className="actions brew-actions">
-        <button
-          onClick={() => {
-            if (window.confirm('抽出を終了してレシピに戻りますか？')) onExit()
-          }}
-        >
-          抽出を中止
-        </button>
-        <button className="primary" onClick={() => setPaused(!paused)}>
-          {paused ? '再開する' : '一時停止'}
-        </button>
-      </div>
-      <button className="skip-button" onClick={skip}>スキップ</button>
       <p className="muted">
         ステップは自動で切り替わります。通知音が聞こえる音量にし、この画面を開いたままお使いください。
       </p>
