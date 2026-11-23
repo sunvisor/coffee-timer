@@ -4,11 +4,17 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "check:pwa": "npm run build && node scripts/check-pwa.mjs",
     "test": "vitest run --environment jsdom",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"
+  },
+  "overrides": {
+    "workbox-build": {
+      "glob": "^14.0.2"
+    }
   },
   "dependencies": {
     "react": "^19.3.1",
@@ -30,6 +36,7 @@
     "oxlint": "^1.90.0",
     "typescript": "~7.0.2",
     "vite": "^8.3.6",
+    "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.1.1"
   }
 }
