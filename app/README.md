@@ -80,6 +80,7 @@ JSON のトップレベルはレシピの配列です。各レシピは以下の
 npm test
 npm run lint
 npm run build
+npm run check:pwa
 npm run preview
 ```
 
@@ -87,3 +88,24 @@ npm run preview
 `npm run build` は TypeScript の型チェックと本番ビルドを実行します。
 生成された `app/dist` は静的ファイル一式で、Cloudflare へのデプロイ用成果物になります。
 公開スクリプトと手順は [deploy/README.md](../deploy/README.md) を参照してください。
+
+## PWA（インストール・オフライン利用）
+
+HTTPS の公開先にアクセスすると、アプリ本体を端末にキャッシュします。
+初回の読み込みと Service Worker の準備が完了すれば、オフラインでも起動して
+レシピの作成・編集・抽出タイマーを利用できます。Markdown 内の外部画像やリンク先は対象外です。
+
+- Android / PC: 対応ブラウザーのメニューから「アプリをインストール」を選択します。
+- iPhone / iPad: Safari の共有メニューから「ホーム画面に追加」を選択します。
+
+使用中のタイマーや入力を守るため、自動リロードはしません。
+更新版を取得した後、同じアプリのタブとホーム画面のアプリをすべて閉じ、開き直すと反映されます。
+オフライン中の通知音も、画面を開いた状態で使用してください。
+インストールしても、スリープ中の通知やバックグラウンド動作を保証するものではありません。
+
+開発サーバーでは Service Worker を有効にしません。
+`npm run check:pwa` は本番ビルドを行い、マニフェスト・PNG サイズ・登録コード・
+キャッシュ対象を確認します。実機の確認には `npm run preview` または HTTPS の公開先を使ってください。
+
+Workbox のビルド依存 `glob` は、既知の問題が修正された版に限定して上書きしています。
+更新ポリシーは [Vite PWA の仕様](https://vite-pwa-org.netlify.app/guide/prompt-for-update.html) を参照してください。

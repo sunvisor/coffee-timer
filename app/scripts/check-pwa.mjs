@@ -1,0 +1,45 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import { runInNewContext } from 'node:vm'
+
+const dist = new URL('../dist/', import.meta.url)
+const read = (path) => readFile(new URL(path.replace(/^\//, ''), dist))
+const manifest = JSON.parse(await read('manifest.webmanifest'))
+const html = String(await read('index.html'))
+const worker = String(await read('sw.js'))
+
+assert.equal(manifest.display, 'standalone')
+assert.equal(manifest.start_url, '/')
+assert.equal(manifest.scope, '/')
+assert.match(html, /rel="manifest"[^>]+manifest\.webmanifest/)
+assert.match(html, /src="\/registerSW\.js"/)
+assert.match(html, /rel="apple-touch-icon"/)
+
+for (const icon of [...manifest.icons, { src: '/apple-touch-icon.png', sizes: '180x180' }]) {
+  const png = await read(icon.src)
+  assert.equal(png.subarray(1, 4).toString(), 'PNG')
+  assert.equal(`${png.readUInt32BE(16)}x${png.readUInt32BE(20)}`, icon.sizes)
+}
+assert.ok(manifest.icons.some((icon) => icon.sizes === '192x192'))
+assert.ok(manifest.icons.some((icon) => icon.sizes === '512x512' && icon.purpose === 'maskable'))
+
+// Read the generated precache through Workbox's public API without running a browser.
+let precache = []
+runInNewContext(worker, {
+  self: { define() {}, addEventListener() {} },
+  define: (_dependencies, factory) => factory({
+    precacheAndRoute: (entries) => { precache = entries },
+    cleanupOutdatedCaches() {},
+    registerRoute() {},
+    NavigationRoute: class {},
+    createHandlerBoundToURL: (url) => url,
+  }),
+})
+const cached = new Set(precache.map((entry) => entry.url))
+assert.ok(cached.has('index.html'), 'The app shell must be available offline')
+for (const [, path] of html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)) {
+  assert.ok(cached.has(path.slice(1)), `Missing offline asset: ${path}`)
+  await read(path)
+}
+for (const icon of manifest.icons) assert.ok(cached.has(icon.src.slice(1)))
+console.log('PWA manifest, icons, registration, and offline assets verified.')
