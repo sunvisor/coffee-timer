@@ -16,7 +16,7 @@ afterEach(() => {
 describe('recipe management', () => {
   it('creates a recipe, reorders tasks, persists edits, and reloads it', () => {
     const app = render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: /レシピを追加/ }))
+    fireEvent.click(screen.getByRole('button', { name: /新しいレシピを作る/ }))
     fireEvent.change(screen.getByLabelText('レシピ名'), { target: { value: '朝の一杯' } })
     fireEvent.click(screen.getByRole('button', { name: /ステップを追加/ }))
     let groups = screen.getAllByRole('group')
@@ -61,7 +61,7 @@ describe('recipe management', () => {
       throw new DOMException('Quota exceeded')
     })
     render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: /レシピを追加/ }))
+    fireEvent.click(screen.getByRole('button', { name: /新しいレシピを作る/ }))
     fireEvent.change(screen.getByLabelText('レシピ名'), { target: { value: '保存できないレシピ' } })
     fireEvent.click(screen.getByRole('button', { name: 'レシピを保存' }))
     expect(screen.getByRole('alert').textContent).toContain('保存できませんでした')

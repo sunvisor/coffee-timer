@@ -616,10 +616,6 @@ main {
   .site-header nav {
     gap: 8px;
   }
-  .header-add {
-    font-size: 0.875rem;
-    padding: 9px 12px;
-  }
   .icon-button {
     padding: 4px 6px;
   }

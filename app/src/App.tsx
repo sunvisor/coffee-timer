@@ -134,9 +134,6 @@ function App() {
             >
               ⚙
             </button>
-            <button className="primary header-add" onClick={add}>
-              <span aria-hidden="true">＋</span> レシピを追加
-            </button>
           </nav>
         )}
       </header>
