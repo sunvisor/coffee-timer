@@ -85,12 +85,12 @@ export function Brew({
       </div>
       {task.type === 'pour' ? (
         <div className="pour-amount">
-          <span>いま注ぐ量の目安</span>
+          <span>スケールの表示の目安（累計）</span>
           <strong>
-            {Math.floor(progress.amount)}
-            <small> / {task.amount} g</small>
+            {Math.floor(progress.poured + progress.amount)}
+            <small> / {progress.poured + task.amount} g</small>
           </strong>
-          <span>スケールの累計目標：{progress.poured + task.amount} g</span>
+          <span>このステップで注ぐ量：{task.amount} g</span>
         </div>
       ) : (
         <p className="wait-message">おいしさが引き出されるのを待ちましょう。</p>

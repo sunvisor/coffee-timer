@@ -139,6 +139,19 @@ describe('backup import', () => {
 })
 
 describe('brewing interaction', () => {
+  it('shows cumulative scale amounts across pours and waiting steps', () => {
+    vi.useFakeTimers()
+    render(<Brew recipe={sampleRecipes[0]} audio={null} onExit={vi.fn()} />)
+    const scale = () => screen.getByText('スケールの表示の目安（累計）').parentElement!
+    expect(within(scale()).getByRole('strong').textContent).toBe('0 / 30 g')
+    act(() => vi.advanceTimersByTime(40000))
+    expect(within(scale()).getByRole('strong').textContent).toBe('30 / 150 g')
+    act(() => vi.advanceTimersByTime(20000))
+    expect(within(scale()).getByRole('strong').textContent).toBe('90 / 150 g')
+    act(() => vi.advanceTimersByTime(20000))
+    expect(within(scale()).getByRole('strong').textContent).toBe('150 / 250 g')
+  })
+
   it('pauses, resumes, advances steps, and completes with a notification at every boundary', () => {
     vi.useFakeTimers()
     const recipe = {
