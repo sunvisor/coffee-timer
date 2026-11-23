@@ -115,7 +115,7 @@ describe('backup import', () => {
   it('rejects invalid backup data without calling the save handler', async () => {
     const onImport = vi.fn()
     render(<Settings recipes={sampleRecipes} onImport={onImport} />)
-    fireEvent.change(screen.getByLabelText('レシピ JSON ファイル'), {
+    fireEvent.change(screen.getByLabelText('レシピファイル'), {
       target: { files: [{ size: 10, text: async () => '[{"name":"invalid"}]' }] },
     })
     expect((await screen.findByRole('alert')).textContent).toContain(
@@ -128,7 +128,7 @@ describe('backup import', () => {
     const onImport = vi.fn(() => true)
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     render(<Settings recipes={[]} onImport={onImport} />)
-    fireEvent.change(screen.getByLabelText('レシピ JSON ファイル'), {
+    fireEvent.change(screen.getByLabelText('レシピファイル'), {
       target: { files: [{ size: 100, text: async () => JSON.stringify(sampleRecipes) }] },
     })
     expect((await screen.findByRole('status')).textContent).toContain(
