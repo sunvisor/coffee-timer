@@ -86,4 +86,4 @@ npm run preview
 テストは Vitest / Testing Library / jsdom を使用します。
 `npm run build` は TypeScript の型チェックと本番ビルドを実行します。
 生成された `app/dist` は静的ファイル一式で、Cloudflare へのデプロイ用成果物になります。
-現段階ではデプロイ設定や公開は行っていません。
+公開スクリプトと手順は [deploy/README.md](../deploy/README.md) を参照してください。

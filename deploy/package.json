@@ -1,0 +1,11 @@
+{
+  "name": "coffee-timer-deploy",
+  "private": true,
+  "scripts": {
+    "login": "wrangler login",
+    "whoami": "wrangler whoami"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
