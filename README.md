@@ -113,3 +113,7 @@ npm run login --prefix deploy
 
 React Compiler を有効にし、PWA の生成には Vite PWA、テストには Vitest と Testing Library を使用しています。
 アプリの詳細仕様と開発情報は [app/README.md](app/README.md) に記載しています。
+
+## ライセンス
+
+[MIT License](LICENSE)
