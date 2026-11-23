@@ -14,6 +14,14 @@ npm run login --prefix deploy
 npm run whoami --prefix deploy
 ```
 
+すでに `deploy` ディレクトリ内にいる場合は、`--prefix deploy` を付けずに実行します。
+
+```sh
+npm ci
+npm run login
+npm run whoami
+```
+
 ログイン時にブラウザーが開きます。公開先のアカウントで認証してください。
 複数アカウントを利用している場合は、公開先を指定してください。
 
@@ -30,6 +38,8 @@ export CLOUDFLARE_ACCOUNT_ID='your-account-id'
 ```sh
 ./deploy/deploy.sh
 ```
+
+`deploy` ディレクトリ内にいる場合は `./deploy.sh` を実行してください。
 
 スクリプトは作業ディレクトリに依存せず、次を順に実行します。
 
