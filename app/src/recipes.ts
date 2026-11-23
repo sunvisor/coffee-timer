@@ -121,7 +121,7 @@ export function getBrewProgress(tasks: BrewTask[], elapsed: number) {
 export const sampleRecipes: Recipe[] = [
   {
     id: 'house-blend',
-    name: 'いつものハンドドリップ',
+    name: 'いつものハンドドリップ (Sample)',
     description:
       'すっきりとした甘さと、やさしい余韻。\n毎日の一杯にちょうどいい、基本のレシピです。',
     coffee: 15,

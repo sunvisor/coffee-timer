@@ -61,14 +61,14 @@ export function Settings({
         <div className="setting-row">
           <div>
             <h3>レシピの保存</h3>
-            <p>すべてのレシピを JSON ファイルに書き出します。</p>
+            <p>すべてのレシピをファイルに書き出します。</p>
           </div>
           <button onClick={download}>ダウンロード</button>
         </div>
         <div className="setting-row">
           <div>
             <h3>レシピの読み込み</h3>
-            <p>保存した JSON で現在のレシピ一覧を置き換えます。</p>
+            <p>保存したレシピファイルを読み込みます。現在のレシピは置き換えられます。</p>
           </div>
           <button onClick={() => input.current?.click()}>ファイルを選択</button>
         </div>
@@ -76,7 +76,7 @@ export function Settings({
           ref={input}
           type="file"
           accept=".json,application/json"
-          aria-label="レシピ JSON ファイル"
+          aria-label="レシピファイル"
           hidden
           onChange={upload}
         />
