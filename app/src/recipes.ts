@@ -18,8 +18,10 @@ export type Recipe = {
 }
 
 export const STORAGE_KEY = 'coffee-timer.recipes.v1'
-export const formatTime = (seconds: number) =>
-  `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${Math.ceil(seconds % 60).toString().padStart(2, '0')}`
+export function formatTime(seconds: number) {
+  const rounded = Math.max(0, Math.ceil(seconds))
+  return `${Math.floor(rounded / 60).toString().padStart(2, '0')}:${(rounded % 60).toString().padStart(2, '0')}`
+}
 export const totalSeconds = (recipe: Recipe) => recipe.tasks.reduce((sum, task) => sum + task.seconds, 0)
 export const newTask = (): BrewTask => ({ id: crypto.randomUUID(), type: 'pour', description: '', seconds: 30, amount: 50 })
 export const newRecipe = (): Recipe => ({
