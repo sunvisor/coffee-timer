@@ -95,6 +95,13 @@ npm run check:pwa --prefix app
 `check:pwa` は TypeScript の型チェック、本番ビルド、マニフェスト・アイコン・
 Service Worker のキャッシュ対象の検証を行います。ビルド結果は `app/dist` に生成されます。
 
+## CI
+
+[GitHub Actions](.github/workflows/ci.yml) で、PR の作成・コミット追加・再オープン時に検証します。
+Node.js 24 で依存関係をインストールし、lint、テスト、型チェック、本番ビルド、PWA チェックを実行します。
+同じ PR が更新された場合は、古い実行をキャンセルします。
+main へのマージや push では実行しません。
+
 ## Cloudflare への公開
 
 Cloudflare Workers の Static Assets に公開できます。
