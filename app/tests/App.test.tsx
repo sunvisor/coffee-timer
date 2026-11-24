@@ -23,6 +23,23 @@ afterEach(() => {
 })
 
 describe('recipe management', () => {
+  it('keeps editor input and another tab additions when a save conflicts', () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sampleRecipes))
+    renderApp()
+    fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
+    fireEvent.click(screen.getByRole('button', { name: '編集' }))
+    fireEvent.change(screen.getByLabelText('レシピ名'), { target: { value: '編集途中のレシピ' } })
+    const updatedElsewhere = [
+      ...sampleRecipes,
+      { ...sampleRecipes[0], id: 'other-tab', name: '別タブで追加' },
+    ]
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedElsewhere))
+    fireEvent.click(screen.getByRole('button', { name: 'レシピを保存' }))
+    expect(screen.getByRole('alert').textContent).toContain('別のタブ')
+    expect(screen.getByLabelText<HTMLInputElement>('レシピ名').value).toBe('編集途中のレシピ')
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!)).toEqual(updatedElsewhere)
+  })
+
   it('opens the home screen and saves recipes and tasks when randomUUID is unavailable', () => {
     vi.stubGlobal('crypto', { getRandomValues: crypto.getRandomValues.bind(crypto) })
     renderApp()
