@@ -1,12 +1,23 @@
-export async function prepareAudio() {
+export function closeAudio(context: AudioContext | null) {
+  if (context && context.state !== 'closed') {
+    void context.close().catch((error) => console.warn('Could not close audio context', error))
+  }
+}
+
+export async function prepareAudio(signal?: AbortSignal) {
+  if (signal?.aborted) throw new DOMException('Audio preparation cancelled', 'AbortError')
   if (!window.AudioContext) throw new Error('このブラウザーは通知音に対応していません。')
   const context = new AudioContext()
+  const onAbort = () => closeAudio(context)
+  signal?.addEventListener('abort', onAbort, { once: true })
   try {
     await context.resume()
     return context
   } catch (error) {
-    await context.close()
+    closeAudio(context)
     throw error
+  } finally {
+    signal?.removeEventListener('abort', onAbort)
   }
 }
 
