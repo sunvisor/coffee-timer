@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Markdown } from './Markdown'
 import { BrewControls } from './BrewControls'
+import { ScreenAwakeNotice } from './ScreenAwakeNotice'
 import { ring } from './audio'
 import { formatTime, getBrewProgress, totalSeconds, type Recipe } from './recipes'
 
@@ -127,6 +128,7 @@ export function Brew({
       <p className="muted">
         ステップは自動で切り替わります。通知音が聞こえる音量にし、この画面を開いたままお使いください。
       </p>
+      <ScreenAwakeNotice />
     </section>
   )
 }
