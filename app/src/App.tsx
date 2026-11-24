@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { version } from '../package.json'
 import { Brew } from './Brew'
-import { prepareAudio } from './audio'
+import { closeAudio } from './audio'
 import { Markdown } from './Markdown'
 import { RecipeEditor } from './RecipeEditor'
 import { RecipeOrder } from './RecipeOrder'
@@ -10,6 +10,7 @@ import { Settings } from './Settings'
 import { newRecipe, type Recipe } from './recipes'
 import { useRecipes } from './useRecipes'
 import { useScreen } from './useScreen'
+import { useBrewStart } from './useBrewStart'
 import type { Screen } from './screens'
 import './App.css'
 
@@ -84,8 +85,16 @@ function Home({
 
 function App() {
   const { recipes, error, save } = useRecipes()
-  const { screen, setScreen } = useScreen(recipes)
+  const { screen, setScreen: navigateScreen } = useScreen(recipes)
   const [audioError, setAudioError] = useState('')
+  const { start, cancel } = useBrewStart((recipe, audio, error) => {
+    setAudioError(error)
+    navigateScreen({ type: 'brew', recipe, audio })
+  })
+  function setScreen(next: Screen, options?: { replace?: boolean }) {
+    cancel()
+    navigateScreen(next, options)
+  }
   const add = () => setScreen({ type: 'edit', recipe: newRecipe() })
   const detail = (recipe: Recipe) => setScreen({ type: 'detail', recipe })
   function saveOrder(ordered: Recipe[]) {
@@ -97,18 +106,8 @@ function App() {
       : [...recipes, recipe]
     if (save(updated)) setScreen({ type: 'detail', recipe }, { replace: true })
   }
-  async function start(recipe: Recipe) {
-    setAudioError('')
-    let audio: AudioContext | null = null
-    try {
-      audio = await prepareAudio()
-    } catch {
-      setAudioError('通知音を有効にできませんでした。画面で残り時間を確認してください。')
-    }
-    setScreen({ type: 'brew', recipe, audio })
-  }
   function exitBrew(next: Screen, audio: AudioContext | null) {
-    if (audio) void audio.close()
+    closeAudio(audio)
     setScreen(next, { replace: true })
   }
   function remove(recipe: Recipe) {
