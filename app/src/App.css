@@ -516,6 +516,46 @@ main {
 .settings .eyebrow {
   margin-bottom: 14px;
 }
+.recipe-import {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.import-filename {
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+.import-options {
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.import-options label {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+}
+.import-options input {
+  width: auto;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.import-options small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+}
+.import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
 .brew {
   margin-top: 40px;
   text-align: center;
