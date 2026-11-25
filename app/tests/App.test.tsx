@@ -4,7 +4,7 @@ import App from '../src/App'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { Brew } from '../src/Brew'
 import { Settings } from '../src/Settings'
-import { sampleRecipes, STORAGE_KEY } from '../src/recipes'
+import { parseRecipes, sampleRecipes, STORAGE_KEY } from '../src/recipes'
 
 const routers: ReturnType<typeof createMemoryRouter>[] = []
 function renderApp() {
@@ -189,6 +189,13 @@ describe('recipe management', () => {
 })
 
 describe('backup import', () => {
+  async function selectBackup(content = JSON.stringify(sampleRecipes)) {
+    fireEvent.change(screen.getByLabelText('レシピファイル'), {
+      target: { files: [{ name: 'coffee-recipes.json', size: 100, text: async () => content }] },
+    })
+    await screen.findByRole('group', { name: '読み込み方法' })
+  }
+
   it('exports every recipe as JSON in a downloadable file', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout'] })
     let exported: Blob | undefined
@@ -232,15 +239,69 @@ describe('backup import', () => {
 
   it('imports validated backups only after confirming replacement', async () => {
     const onImport = vi.fn(() => true)
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
-    render(<Settings recipes={[]} onImport={onImport} />)
-    fireEvent.change(screen.getByLabelText('レシピファイル'), {
-      target: { files: [{ size: 100, text: async () => JSON.stringify(sampleRecipes) }] },
-    })
-    expect((await screen.findByRole('status')).textContent).toContain(
-      '1 件のレシピを読み込みました',
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
+    render(<Settings recipes={sampleRecipes} onImport={onImport} />)
+    await selectBackup()
+    expect(onImport).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('radio', { name: /現在のレシピをすべて置き換える/ }))
+    fireEvent.click(screen.getByRole('button', { name: '1 件に置き換える' }))
+    expect(confirm).toHaveBeenCalledWith(
+      '現在の 1 件のレシピを削除し、1 件のレシピに置き換えます。よろしいですか？',
     )
+    expect(onImport).not.toHaveBeenCalled()
+    confirm.mockReturnValue(true)
+    fireEvent.click(screen.getByRole('button', { name: '1 件に置き換える' }))
+    expect(screen.getByRole('status').textContent).toContain('1 件のレシピに置き換えました')
     expect(onImport).toHaveBeenCalledWith(sampleRecipes)
+  })
+
+  it('defaults to adding recipes with fresh IDs and persists repeated imports', async () => {
+    const confirm = vi.spyOn(window, 'confirm')
+    renderApp()
+    fireEvent.click(screen.getByRole('button', { name: '設定' }))
+    for (let count = 2; count <= 3; count++) {
+      await selectBackup()
+      expect(screen.getByRole<HTMLInputElement>('radio', { name: /現在のレシピに追加する/ }).checked).toBe(true)
+      fireEvent.click(screen.getByRole('button', { name: '1 件を追加する' }))
+      expect(screen.getByRole('status').textContent).toBe(`1 件を追加しました。合計 ${count} 件になりました。`)
+      const saved = parseRecipes(JSON.parse(localStorage.getItem(STORAGE_KEY)!))
+      expect(saved).toHaveLength(count)
+      expect(saved[0]).toEqual(sampleRecipes[0])
+      expect(saved[count - 1]).toEqual({ ...sampleRecipes[0], id: expect.any(String) })
+    }
+    expect(confirm).not.toHaveBeenCalled()
+  })
+
+  it('cancels the preview without saving and defaults to add on the next selection', async () => {
+    const onImport = vi.fn()
+    render(<Settings recipes={sampleRecipes} onImport={onImport} />)
+    await selectBackup()
+    fireEvent.click(screen.getByRole('radio', { name: /現在のレシピをすべて置き換える/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'キャンセル' }))
+    expect(screen.queryByRole('group')).toBeNull()
+    expect(onImport).not.toHaveBeenCalled()
+    await selectBackup()
+    expect(screen.getByRole<HTMLInputElement>('radio', { name: /現在のレシピに追加する/ }).checked).toBe(true)
+  })
+
+  it('keeps the preview and reports no success when storage cannot be saved', async () => {
+    const onImport = vi.fn(() => false)
+    render(<Settings recipes={sampleRecipes} onImport={onImport} />)
+    await selectBackup()
+    fireEvent.click(screen.getByRole('button', { name: '1 件を追加する' }))
+    expect(onImport).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('status')).toBeNull()
+    expect(screen.getByRole('group', { name: '読み込み方法' })).toBeTruthy()
+  })
+
+  it('allows replacing the list with an empty backup after confirmation', async () => {
+    const onImport = vi.fn(() => true)
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    render(<Settings recipes={sampleRecipes} onImport={onImport} />)
+    await selectBackup('[]')
+    fireEvent.click(screen.getByRole('radio', { name: /現在のレシピをすべて置き換える/ }))
+    fireEvent.click(screen.getByRole('button', { name: '0 件に置き換える' }))
+    expect(onImport).toHaveBeenCalledWith([])
   })
 })
 
