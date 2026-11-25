@@ -73,6 +73,21 @@ main {
   padding: 65px 42px 65px 0;
   gap: 30px;
 }
+.update-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 16px;
+  background: #ece6dc;
+  border-radius: 8px;
+}
+.update-notice .error {
+  width: 100%;
+  margin: 0;
+}
 .eyebrow {
   display: block;
   color: var(--accent);
