@@ -23,10 +23,15 @@ afterEach(() => {
 describe('screen routing', () => {
   it('uses browser back and forward to move between recipe and settings screens', async () => {
     const router = renderApp()
+    expect(screen.getByRole('banner')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
     expect(router.state.location.pathname).toBe('/recipes/house-blend')
-    fireEvent.click(screen.getByRole('button', { name: '設定' }))
+    expect(screen.queryByRole('banner')).toBeNull()
+    await act(async () => {
+      await router.navigate('/settings')
+    })
     expect(router.state.location.pathname).toBe('/settings')
+    expect(screen.queryByRole('banner')).toBeNull()
     await act(async () => {
       await router.navigate(-1)
     })
@@ -39,6 +44,7 @@ describe('screen routing', () => {
       await router.navigate(-2)
     })
     expect(screen.getByRole('heading', { name: /マイレシピ/ })).toBeTruthy()
+    expect(screen.getByRole('banner')).toBeTruthy()
   })
 
   it('restores saved recipes from direct URLs and handles missing recipes', async () => {

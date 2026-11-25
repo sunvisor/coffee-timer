@@ -28,7 +28,7 @@ function Home({
   return (
     <>
       <section className="home-intro">
-        <div>
+        <div className="home-intro-copy">
           <span className="eyebrow">A LITTLE RITUAL, A BETTER DAY.</span>
           <h1>一杯を、ていねいに。</h1>
           <p>
@@ -38,7 +38,15 @@ function Home({
           </p>
         </div>
         <div className="cup-art" aria-hidden="true">
-          <div className="steam">﹏</div>
+          <svg
+            className="steam"
+            viewBox="0 0 90 100"
+            fill="currentColor"
+          >
+            <path d="M34 99C42 77 27 57 17 43C6 28 5 20 10 13C-1 23 4 38 13 51C25 69 36 81 34 99Z" />
+            <path d="M43 84C53 73 55 59 51 45C47 31 50 22 61 20C73 18 81 26 77 35C74 42 64 42 62 35C60 31 62 28 66 27C58 26 55 34 59 40C64 49 78 47 83 37C90 23 78 10 64 12C43 13 39 29 44 47C49 64 48 73 43 84Z" />
+            <path d="M32 32C23 20 25 14 30 7C33 2 33-1 32-4C43 4 39 12 35 18C32 23 30 26 32 32Z" transform="translate(0 4)" />
+          </svg>
           <div className="cup" />
           <div className="saucer" />
         </div>
@@ -119,31 +127,39 @@ function App() {
   }
   return (
     <div className="app-shell">
-      <header className="site-header">
-        <button
-          className="brand"
-          disabled={screen.type === 'brew'}
-          onClick={() => setScreen({ type: 'home' })}
-        >
-          <span className="brand-icon" aria-hidden="true">
-            ☕
-          </span>
-          <span>
-            coffee timer<small>いつもの一杯を、もっとおいしく。</small>
-          </span>
-        </button>
-        {screen.type !== 'brew' && (
+      {screen.type === 'home' && (
+        <header className="site-header">
+          <button className="brand" onClick={() => setScreen({ type: 'home' })}>
+            <span className="brand-icon" aria-hidden="true">
+              ☕
+            </span>
+            <span>
+              coffee timer<small>いつもの一杯を、もっとおいしく。</small>
+            </span>
+          </button>
           <nav aria-label="メインメニュー">
             <button
-              className={screen.type === 'settings' ? 'selected icon-button' : 'icon-button'}
+              className="icon-button"
               onClick={() => setScreen({ type: 'settings' })}
               aria-label="設定"
+              title="設定"
             >
-              ⚙
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m9 3 .5-2h5l.5 2 2 1 2-.5 2.5 4.3L20 9.5v2l1.5 1.7L19 17.5l-2-.5-2 1-.5 2h-5L9 18l-2-1-2 .5-2.5-4.3L4 11.5v-2L2.5 7.8 5 3.5 7 4Z" transform="translate(0 1.5)" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
             </button>
           </nav>
-        )}
-      </header>
+        </header>
+      )}
       <main>
         {screen.type !== 'home' && screen.type !== 'brew' && (
           <button className="back-button" onClick={() => setScreen({ type: 'home' })}>
