@@ -10,7 +10,7 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
     VitePWA({
       registerType: 'prompt',
-      injectRegister: 'script',
+      injectRegister: false,
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         id: '/',

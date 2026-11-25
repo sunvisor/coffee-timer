@@ -12,6 +12,7 @@ import { useRecipes } from './useRecipes'
 import { useScreen } from './useScreen'
 import { useBrewStart } from './useBrewStart'
 import type { Screen } from './screens'
+import { usePwaUpdate } from './usePwaUpdate'
 import './App.css'
 
 function Home({
@@ -94,6 +95,7 @@ function Home({
 function App() {
   const { recipes, error, save } = useRecipes()
   const { screen, setScreen: navigateScreen } = useScreen(recipes)
+  const appUpdate = usePwaUpdate(screen.type === 'home')
   const [audioError, setAudioError] = useState('')
   const { start, cancel } = useBrewStart((recipe, audio, error) => {
     setAudioError(error)
@@ -161,6 +163,15 @@ function App() {
         </header>
       )}
       <main>
+        {screen.type === 'home' && appUpdate.ready && (
+          <div className="update-notice">
+            <p role="status">新しいバージョンがあります。</p>
+            <button disabled={appUpdate.applying} onClick={() => void appUpdate.apply()}>
+              {appUpdate.applying ? '更新中…' : '更新する'}
+            </button>
+            {appUpdate.error && <p role="alert" className="error">{appUpdate.error}</p>}
+          </div>
+        )}
         {screen.type !== 'home' && screen.type !== 'brew' && (
           <button className="back-button" onClick={() => setScreen({ type: 'home' })}>
             ホームに戻る

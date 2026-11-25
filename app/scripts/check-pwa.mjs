@@ -12,7 +12,7 @@ assert.equal(manifest.display, 'standalone')
 assert.equal(manifest.start_url, '/')
 assert.equal(manifest.scope, '/')
 assert.match(html, /rel="manifest"[^>]+manifest\.webmanifest/)
-assert.match(html, /src="\/registerSW\.js"/)
+assert.doesNotMatch(html, /src="\/registerSW\.js"/)
 assert.match(html, /rel="apple-touch-icon"/)
 
 for (const icon of [...manifest.icons, { src: '/apple-touch-icon.png', sizes: '180x180' }]) {
@@ -42,4 +42,10 @@ for (const [, path] of html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)) {
   await read(path)
 }
 for (const icon of manifest.icons) assert.ok(cached.has(icon.src.slice(1)))
+const scripts = await Promise.all(
+  [...html.matchAll(/src="(\/assets\/[^"]+\.js)"/g)].map(async ([, path]) => String(await read(path))),
+)
+assert.ok(scripts.some((script) => script.includes('serviceWorker') && script.includes('/sw.js')),
+  'The app must register its service worker to handle update prompts')
+assert.match(worker, /SKIP_WAITING/)
 console.log('PWA manifest, icons, registration, and offline assets verified.')
