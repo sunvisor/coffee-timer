@@ -1,5 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
+import App from '../src/App'
 import { Brew } from '../src/Brew'
 import { ScreenAwakeNotice } from '../src/ScreenAwakeNotice'
 import { keepScreenAwake } from '../src/screenWakeLock'
@@ -13,14 +15,74 @@ class FakeLock extends EventTarget {
   })
 }
 
-beforeEach(() => vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible'))
+const activeMessage = 'この画面を表示している間は、画面が自動でオフにならないようにしています。'
+const routers: ReturnType<typeof createMemoryRouter>[] = []
+function renderApp() {
+  const router = createMemoryRouter([{ path: '*', Component: App }])
+  routers.push(router)
+  return render(<RouterProvider router={router} />)
+}
+
+beforeEach(() => {
+  localStorage.clear()
+  vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
+})
 afterEach(() => {
   cleanup()
+  routers.splice(0).forEach((router) => router.dispose())
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
 })
 
 describe('screen wake lock', () => {
+  it('prevents screen off on recipe details and releases when going home or editing', async () => {
+    const locks: FakeLock[] = []
+    const request = vi.fn(async () => {
+      const lock = new FakeLock()
+      locks.push(lock)
+      return lock
+    })
+    vi.stubGlobal('navigator', { wakeLock: { request } })
+    renderApp()
+    expect(request).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
+    await screen.findByText(activeMessage)
+    expect(locks[0].release).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'ホームに戻る' }))
+    expect(locks[0].release).toHaveBeenCalledOnce()
+    fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
+    await screen.findByText(activeMessage)
+    fireEvent.click(screen.getByRole('button', { name: '編集' }))
+    expect(locks[1].release).toHaveBeenCalledOnce()
+    expect(request).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps preventing screen off through brewing and reacquires on returning to the recipe', async () => {
+    const locks: FakeLock[] = []
+    const request = vi.fn(async () => {
+      const lock = new FakeLock()
+      locks.push(lock)
+      return lock
+    })
+    vi.stubGlobal('navigator', { wakeLock: { request } })
+    vi.stubGlobal('AudioContext', undefined)
+    renderApp()
+    fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
+    await screen.findByText(activeMessage)
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: '抽出開始' })))
+    await screen.findByText(activeMessage)
+    expect(locks[0].release).toHaveBeenCalledOnce()
+    expect(locks[1].release).not.toHaveBeenCalled()
+    for (const _task of sampleRecipes[0].tasks) {
+      fireEvent.click(screen.getByRole('button', { name: 'スキップ' }))
+    }
+    expect(locks[1].release).toHaveBeenCalledOnce()
+    fireEvent.click(screen.getByRole('button', { name: 'レシピに戻る' }))
+    await screen.findByText(activeMessage)
+    expect(locks[2].release).not.toHaveBeenCalled()
+    expect(request).toHaveBeenCalledTimes(3)
+  })
+
   it('requests screen wake lock and releases it after use', async () => {
     const lock = new FakeLock()
     const request = vi.fn(async () => lock)
@@ -97,7 +159,7 @@ describe('screen wake lock', () => {
     const request = vi.fn(async () => lock)
     vi.stubGlobal('navigator', { wakeLock: { request } })
     render(<Brew recipe={sampleRecipes[0]} audio={null} onExit={vi.fn()} onHome={vi.fn()} />)
-    await screen.findByText('抽出中は画面が自動でオフにならないようにしています。')
+    await screen.findByText(activeMessage)
     fireEvent.click(screen.getByRole('button', { name: '一時停止' }))
     expect(lock.release).not.toHaveBeenCalled()
     for (const _task of sampleRecipes[0].tasks) {
@@ -114,7 +176,7 @@ describe('screen wake lock', () => {
     const view = render(
       <Brew recipe={sampleRecipes[0]} audio={null} onExit={vi.fn()} onHome={vi.fn()} />,
     )
-    await screen.findByText('抽出中は画面が自動でオフにならないようにしています。')
+    await screen.findByText(activeMessage)
     act(() => view.unmount())
     expect(lock.release).toHaveBeenCalledOnce()
   })
