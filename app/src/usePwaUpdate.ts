@@ -11,10 +11,12 @@ function watchForUpdates(registration: ServiceWorkerRegistration | undefined) {
     }
   }
   void check()
+  const interval = window.setInterval(() => void check(), 60_000)
   document.addEventListener('visibilitychange', check)
   window.addEventListener('pageshow', check)
   window.addEventListener('online', check)
   return () => {
+    window.clearInterval(interval)
     document.removeEventListener('visibilitychange', check)
     window.removeEventListener('pageshow', check)
     window.removeEventListener('online', check)

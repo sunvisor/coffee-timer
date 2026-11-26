@@ -31,9 +31,31 @@ afterEach(() => {
   routers.splice(0).forEach((router) => router.dispose())
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
+  vi.useRealTimers()
 })
 
 describe('PWA update lifecycle', () => {
+  it('checks every minute while visible and online and stops after unmount', async () => {
+    vi.useFakeTimers()
+    const check = vi.fn().mockResolvedValue(undefined)
+    const { unmount } = renderHook(() => usePwaUpdate(true))
+    await act(async () => options().onRegisteredSW?.('/sw.js', createRegistration(check)))
+    expect(check).toHaveBeenCalledOnce()
+    await act(async () => vi.advanceTimersByTimeAsync(60_000))
+    expect(check).toHaveBeenCalledTimes(2)
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden')
+    await act(async () => vi.advanceTimersByTimeAsync(60_000))
+    expect(check).toHaveBeenCalledTimes(2)
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    await act(async () => vi.advanceTimersByTimeAsync(60_000))
+    expect(check).toHaveBeenCalledTimes(2)
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true)
+    unmount()
+    await act(async () => vi.advanceTimersByTimeAsync(60_000))
+    expect(check).toHaveBeenCalledTimes(2)
+  })
+
   it('checks on registration, foreground resume, page restore, and reconnect, then cleans up', async () => {
     const check = vi.fn().mockResolvedValue(undefined)
     const { unmount } = renderHook(() => usePwaUpdate(true))

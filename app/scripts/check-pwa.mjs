@@ -25,16 +25,19 @@ assert.ok(manifest.icons.some((icon) => icon.sizes === '512x512' && icon.purpose
 
 // Read the generated precache through Workbox's public API without running a browser.
 let precache = []
+let claimsClients = false
 runInNewContext(worker, {
   self: { define() {}, addEventListener() {} },
   define: (_dependencies, factory) => factory({
     precacheAndRoute: (entries) => { precache = entries },
     cleanupOutdatedCaches() {},
+    clientsClaim() { claimsClients = true },
     registerRoute() {},
     NavigationRoute: class {},
     createHandlerBoundToURL: (url) => url,
   }),
 })
+assert.ok(claimsClients, 'An activated update must control open pages so they can finish updating')
 const cached = new Set(precache.map((entry) => entry.url))
 assert.ok(cached.has('index.html'), 'The app shell must be available offline')
 for (const [, path] of html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)) {
