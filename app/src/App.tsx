@@ -269,6 +269,7 @@ function App() {
             id={screen.type === 'log' ? screen.id : undefined}
             onSelect={(id) => setScreen({ type: 'log', id })}
             onRecipe={(recipe) => setScreen({ type: 'edit', recipe })}
+            onBack={() => setScreen({ type: screen.type === 'log' ? 'logs' : 'settings' })}
           />
         )}
         {screen.type === 'not-found' && (
