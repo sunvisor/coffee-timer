@@ -19,7 +19,7 @@ Learn more: [日本語](https://coffee.sunvisor.net/about/) · [English](https:/
 - Warnings when recipe water and step totals differ
 - Brew records with actual step durations, pauses, and skips
 - Create a new recipe from a brew record
-- JSON recipe export and import, with add and replace modes
+- Save recipes to a file (JSON format) and load them to add to or replace your current recipes
 - Installable PWA with offline support after the first successful load
 
 ## Brewing
@@ -72,11 +72,12 @@ does not change existing records. Recipe backup files do not include brew record
 ## Recipes and backups
 
 Storage is specific to the browser and site origin. Recipes do not sync automatically between devices,
-browsers, or local and deployed instances. Export a JSON backup from Settings before clearing browser
-data or changing devices.
+browsers, or local and deployed instances. Save your recipes to a file (JSON format) in Settings
+before clearing browser data or changing devices. Load the saved file to bring your recipes back.
 
-Imports add recipes by default, with new IDs. Replace mode asks for confirmation before replacing the
-entire recipe list. See the [app documentation](app/README.md#backup-format) for the file format.
+Loading a saved file adds its recipes to your list by default. You can also choose to replace the
+entire list, with confirmation before any recipes are removed.
+See the [app documentation](app/README.md#backup-format) for technical details of the file format.
 
 ## Local development
 

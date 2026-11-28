@@ -218,7 +218,7 @@ describe('backup import', () => {
     )
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
     render(<Settings recipes={sampleRecipes} onImport={vi.fn()} />)
-    fireEvent.click(screen.getByRole('button', { name: 'ダウンロード' }))
+    fireEvent.click(screen.getByRole('button', { name: '保存する' }))
     expect(click).toHaveBeenCalledOnce()
     expect(exported?.type).toBe('application/json')
     const content = await new Promise<string>((resolve) => {
