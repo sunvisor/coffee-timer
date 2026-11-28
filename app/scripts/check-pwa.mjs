@@ -26,18 +26,34 @@ assert.ok(manifest.icons.some((icon) => icon.sizes === '512x512' && icon.purpose
 // Read the generated precache through Workbox's public API without running a browser.
 let precache = []
 let claimsClients = false
+let fallbackOptions
 runInNewContext(worker, {
   self: { define() {}, addEventListener() {} },
-  define: (_dependencies, factory) => factory({
-    precacheAndRoute: (entries) => { precache = entries },
-    cleanupOutdatedCaches() {},
-    clientsClaim() { claimsClients = true },
-    registerRoute() {},
-    NavigationRoute: class {},
-    createHandlerBoundToURL: (url) => url,
-  }),
+  define: (_dependencies, factory) =>
+    factory({
+      precacheAndRoute: (entries) => {
+        precache = entries
+      },
+      cleanupOutdatedCaches() {},
+      clientsClaim() {
+        claimsClients = true
+      },
+      registerRoute() {},
+      NavigationRoute: class {
+        constructor(_handler, options) {
+          fallbackOptions = options
+        }
+      },
+      createHandlerBoundToURL: (url) => url,
+    }),
 })
 assert.ok(claimsClients, 'An activated update must control open pages so they can finish updating')
+assert.ok(
+  fallbackOptions.denylist.some((pattern) => pattern.test('/about/')),
+  'The promotional pages must not be replaced by the app shell',
+)
+assert.ok(fallbackOptions.denylist.some((pattern) => pattern.test('/about/en/')))
+assert.ok(!fallbackOptions.denylist.some((pattern) => pattern.test('/')))
 const cached = new Set(precache.map((entry) => entry.url))
 assert.ok(cached.has('index.html'), 'The app shell must be available offline')
 for (const [, path] of html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)) {
@@ -45,10 +61,23 @@ for (const [, path] of html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)) {
   await read(path)
 }
 for (const icon of manifest.icons) assert.ok(cached.has(icon.src.slice(1)))
+for (const path of [
+  'about/index.html',
+  'about/en/index.html',
+  'about/style.css',
+  'about/open-app.js',
+]) {
+  assert.ok(cached.has(path), `Missing promotional page asset: ${path}`)
+  await read(path)
+}
 const scripts = await Promise.all(
-  [...html.matchAll(/src="(\/assets\/[^"]+\.js)"/g)].map(async ([, path]) => String(await read(path))),
+  [...html.matchAll(/src="(\/assets\/[^"]+\.js)"/g)].map(async ([, path]) =>
+    String(await read(path)),
+  ),
 )
-assert.ok(scripts.some((script) => script.includes('serviceWorker') && script.includes('/sw.js')),
-  'The app must register its service worker to handle update prompts')
+assert.ok(
+  scripts.some((script) => script.includes('serviceWorker') && script.includes('/sw.js')),
+  'The app must register its service worker to handle update prompts',
+)
 assert.match(worker, /SKIP_WAITING/)
 console.log('PWA manifest, icons, registration, and offline assets verified.')

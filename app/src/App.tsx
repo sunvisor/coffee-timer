@@ -291,6 +291,7 @@ function App() {
         <span>
           coffee timer <small>v{version}</small>
         </span>
+        <a href={language === 'ja' ? '/about/' : '/about/en/'}>{t('nav.about')}</a>
         <span>{t('app.footer')}</span>
       </footer>
     </div>

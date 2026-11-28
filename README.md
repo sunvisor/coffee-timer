@@ -6,6 +6,8 @@ No account or backend is required: recipes, brew records, and preferences stay i
 
 [Open the app](https://coffee.sunvisor.net)
 
+Learn more: [日本語](https://coffee.sunvisor.net/about/) · [English](https://coffee.sunvisor.net/about/en/).
+
 ## Features
 
 - Japanese and English UI, switchable in Settings

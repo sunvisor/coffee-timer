@@ -164,6 +164,15 @@ The exported format and storage keys are identical in every UI language.
 
 ## PWA and deployment
 
+The promotional pages are static HTML at `/about/` (Japanese) and `/about/en/` (English), with shared
+CSS and a small script under `public/about`. They work without JavaScript; the script only passes the
+chosen language to the app when opening it. Both pages provide canonical, language-alternate, and
+Open Graph metadata. The app footer links to the matching language.
+They are copied into `dist/about` by Vite and deployed with the app. Workbox precaches their assets
+and excludes `/about` from the app-shell navigation fallback so the URLs remain separate documents.
+When editing content or adding a page language, update its static HTML, language links, metadata,
+and the footer destination as appropriate. Page previews are illustrative, not live timers or records.
+
 The first successful HTTPS load precaches the app for offline use. External Markdown images and links
 are not included. Android and desktop browsers offer installation; on iPhone/iPad, use Safari's
 **Add to Home Screen**.

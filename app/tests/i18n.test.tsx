@@ -98,6 +98,9 @@ describe('language settings', () => {
     expect(screen.getByRole('heading', { name: 'Settings' })).toBeTruthy()
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('en')
     expect(document.documentElement.lang).toBe('en')
+    expect(screen.getByRole('link', { name: 'About this app' }).getAttribute('href')).toBe(
+      '/about/en/',
+    )
     expect(document.title).toContain('A little ritual')
     fireEvent.click(screen.getByRole('link', { name: 'Home' }))
     fireEvent.click(screen.getByRole('button', { name: 'Everyday pour-over (Sample)' }))
@@ -110,6 +113,9 @@ describe('language settings', () => {
     expect(screen.getByLabelText<HTMLSelectElement>('Language').value).toBe('en')
     fireEvent.change(screen.getByLabelText('Language'), { target: { value: 'ja' } })
     expect(document.documentElement.lang).toBe('ja')
+    expect(screen.getByRole('link', { name: 'このアプリについて' }).getAttribute('href')).toBe(
+      '/about/',
+    )
     expect(screen.getByRole('heading', { name: '設定' })).toBeTruthy()
   })
 
