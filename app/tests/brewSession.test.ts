@@ -13,6 +13,22 @@ const start = Date.parse('2026-11-28T00:00:00Z')
 const recipe = { ...sampleRecipes[0], tasks: sampleRecipes[0].tasks.slice(0, 2) }
 
 describe('measured brewing', () => {
+  it('updates overall elapsed and estimated total from pauses and skips through completion', () => {
+    const session = createBrewSession(recipe, start)
+    expect(brewSnapshot(session)).toMatchObject({ elapsed: 0, total: 40 })
+    pauseBrew(session, start + 2000)
+    advanceBrew(session, start + 5000)
+    expect(brewSnapshot(session)).toMatchObject({ elapsed: 5, total: 43 })
+    skipBrew(session, start + 5000)
+    expect(brewSnapshot(session)).toMatchObject({ elapsed: 5, total: 35 })
+    pauseBrew(session, start + 7000)
+    advanceBrew(session, start + 8000)
+    expect(brewSnapshot(session)).toMatchObject({ elapsed: 8, total: 37 })
+    skipBrew(session, start + 8500)
+    expect(brewSnapshot(session)).toMatchObject({ elapsed: 8.5, total: 8.5 })
+    expect(logDuration(session.log!)).toBe(8500)
+  })
+
   it('assigns delayed timer ticks across task boundaries without inflating the duration', () => {
     const session = createBrewSession(recipe, start)
     advanceBrew(session, start + 50_000)

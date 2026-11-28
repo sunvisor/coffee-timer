@@ -306,6 +306,26 @@ describe('backup import', () => {
 })
 
 describe('brewing interaction', () => {
+  it('updates the overall time while paused and removes unused time when skipping', () => {
+    vi.useFakeTimers()
+    render(<Brew recipe={sampleRecipes[0]} audio={null} onExit={vi.fn()} onHome={vi.fn()} />)
+    act(() => vi.advanceTimersByTime(2000))
+    expect(screen.getByText('全体 00:02 / 02:30')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '一時停止' }))
+    act(() => vi.advanceTimersByTime(3000))
+    expect(screen.getByText('全体 00:05 / 02:33')).toBeTruthy()
+    expect(screen.getByRole('timer').textContent).toBe('00:08')
+    fireEvent.click(screen.getByRole('button', { name: 'スキップ' }))
+    expect(screen.getByText('全体 00:05 / 02:25')).toBeTruthy()
+    act(() => vi.advanceTimersByTime(2000))
+    expect(screen.getByText('全体 00:07 / 02:27')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '再開する' }))
+    act(() => vi.advanceTimersByTime(1000))
+    expect(screen.getByText('全体 00:08 / 02:27')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'スキップ' }))
+    expect(screen.getByText('全体 00:08 / 01:58')).toBeTruthy()
+  })
+
   it('skips to the next step and keeps the running clock aligned', () => {
     vi.useFakeTimers()
     render(<Brew recipe={sampleRecipes[0]} audio={null} onExit={vi.fn()} onHome={vi.fn()} />)

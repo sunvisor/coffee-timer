@@ -1,6 +1,6 @@
 import { createId } from './createId'
-import { type BrewLog, type BrewStepLog } from './brewLogs'
-import { getBrewProgress, type Recipe } from './recipes'
+import { stepDuration, type BrewLog, type BrewStepLog } from './brewLogs'
+import { getBrewProgress, totalSeconds, type Recipe } from './recipes'
 
 export function createBrewSession(recipe: Recipe, now: number) {
   return {
@@ -68,13 +68,19 @@ export function skipBrew(session: BrewSession, now: number) {
 }
 
 export function brewSnapshot(session: BrewSession) {
-  const elapsed =
-    session.recipe.tasks.slice(0, session.index).reduce((sum, task) => sum + task.seconds, 0) +
-    session.activeMs / 1000
+  const plannedMs =
+    session.recipe.tasks
+      .slice(0, session.index)
+      .reduce((sum, task) => sum + task.seconds * 1000, 0) + session.activeMs
+  const elapsedMs =
+    session.steps.reduce((sum, step) => sum + stepDuration(step), 0) +
+    session.activeMs +
+    session.pausedMs
   return {
-    elapsed,
+    elapsed: elapsedMs / 1000,
+    total: (elapsedMs + totalSeconds(session.recipe) * 1000 - plannedMs) / 1000,
     paused: session.paused,
     log: session.log,
-    progress: getBrewProgress(session.recipe.tasks, elapsed),
+    progress: getBrewProgress(session.recipe.tasks, plannedMs / 1000),
   }
 }
