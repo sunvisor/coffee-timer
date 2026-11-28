@@ -1,110 +1,99 @@
 # coffee timer
 
-レシピに沿ってハンドドリップを案内する、日本語のコーヒータイマーです。
-ステップごとの残り時間と、スケールで量るお湯の累計を表示し、通知音で次の作業を知らせます。
-サーバーやアカウント登録は不要で、レシピは利用するブラウザーに保存されます。
+A pour-over coffee timer with reusable recipes, step-by-step guidance, and gentle audio cues.
+Water targets are cumulative, so you can leave your server on the scale without taring between pours.
+No account or backend is required: recipes, brew records, and preferences stay in your browser.
 
-[アプリはこちらから利用できます](https://coffee.sunvisor.net)
+[Open the app](https://coffee.sunvisor.net)
 
-## 主な機能
+## Features
 
-- 複数レシピの作成・編集・削除・並べ替え
-- コーヒーの量、湯量、湯温、準備作業の記録
-- 抽出・待機ステップの追加・削除・並べ替え
-- 説明文の Markdown 表示と改行への対応
-- カウントダウン、自動ステップ切り替え、通知音
-- 前のステップまでの注湯量を含めた、スケールの累計値・目標の表示
-- 一時停止・再開、スキップ、中止
-- 抽出記録の自動保存、実測した手順の確認、記録からのレシピ作成
-- レシピの湯量と抽出ステップの合計が異なる場合の警告
-- JSON ファイルによるレシピのバックアップ・読み込み
-- PWA としてのインストールと、初回読み込み後のオフライン利用
+- Japanese and English UI, switchable in Settings
+- Create, edit, delete, and reorder recipes
+- Record coffee weight, water amount, temperature, preparation, and pour/wait steps
+- Markdown descriptions with line breaks
+- Automatic step transitions, countdowns, and audio cues
+- Cumulative scale readings, pause/resume, skip, and stop controls
+- Warnings when recipe water and step totals differ
+- Brew records with actual step durations, pauses, and skips
+- Create a new recipe from a brew record
+- JSON recipe export and import, with add and replace modes
+- Installable PWA with offline support after the first successful load
 
-## 使い方
+## Brewing
 
-1. ホームでレシピを選びます。初回はサンプルレシピが用意されています。
-2. 説明や準備作業を確認し、器具とコーヒーを準備します。
-3. サーバーをスケールにのせ、表示を 0 にして「抽出開始」を押します。
-4. 残り時間と累計表示に合わせてお湯を注ぎます。ステップごとのスケールのリセットは不要です。
-5. 最後のステップが終わったら、淹れたてのコーヒーを楽しんでください。
+1. Choose a recipe on the home screen. A sample recipe is included.
+2. Read the preparation notes and prepare your equipment and coffee.
+3. Place your server on the scale, tare it to zero, and select **Start brewing**.
+4. Follow the countdown and cumulative water targets. Do not tare between pours.
+5. Enjoy your coffee and review the actual steps on the completion screen.
 
-新しいレシピは、ホームの「新しいレシピを作る」から登録します。
-一覧の「並べ替え」で専用画面を開き、上下のボタンで調整して「順序を保存」で確定します。
-キャンセルすると元の順序のまま一覧へ戻ります。
-タスク画面では、時間表示の左上が中止、右上が一時停止・再開、左下がスキップです。
-スキップした抽出ステップの注湯量も、以降の累計に含まれます。
+The timer's round controls are stop (upper left), pause/resume (upper right), and skip (lower left).
+Skipped pour steps still contribute their specified water amount to later cumulative targets.
+**Overall** shows actual elapsed time, including pauses, against an estimated total. Pausing extends the
+total; skipping removes the unexecuted part of a step.
 
-湯量の警告は、お湯 1 ml ≒ 1 g として比較します。警告があっても保存・抽出は続けられます。
-通知音を利用する場合は端末の音量を確認し、抽出中は画面を開いたまま使用してください。
-バックグラウンドやスリープ中の通知・動作は保証されません。
-対応ブラウザーでは、レシピの詳細画面での準備中から抽出中（一時停止中を含む）まで、画面の自動オフを防止します。
-抽出完了時やホーム・編集画面へ移動した際に解除します。レシピに戻ると再び防止します。
-HTTPS が必要で、省電力モードなどにより利用できない場合があります。
+Water warnings compare 1 ml of water with approximately 1 g. They do not prevent saving or brewing.
+Audio cues use media playback volume. Keep the app open while brewing; background execution and
+notifications during sleep are not guaranteed.
 
-画面遷移は URL の `#/` 以降で管理し、ブラウザーの戻る・進むでもアプリ内の画面を移動できます。
-抽出中は戻る・進むによる画面移動を防ぎます。終了する場合は中止ボタンを使ってください。
-ホームより前の履歴や、OS のジェスチャーによるアプリ終了まで無効にするものではありません。
+Supported HTTPS browsers keep the screen awake while viewing a recipe and while brewing, including
+pauses. The lock is released on completion or when leaving for home or the editor, and acquired again
+when returning to a recipe. Battery-saving settings may prevent this feature from working.
 
-## 抽出記録
+Browser back/forward navigates between app screens. During brewing, history navigation is blocked;
+use the stop control to leave. Navigation outside the site and OS gestures cannot be fully disabled.
 
-抽出が完了すると、使用したレシピと各ステップの実測時間を自動で保存し、完了画面に手順を表示します。
-スキップしたステップは押した時点まで、一時停止した時間はそのステップに加えて記録します。
-中止した抽出や、途中でアプリを閉じた抽出は保存しません。
+## Language
 
-「設定」→「抽出記録を見る」から、タイトル・開始日時の一覧と詳細を確認できます。
-詳細の「レシピとして保存」で実測時間を反映した編集画面を開き、確認して新しいレシピとして保存できます。
-時間は秒単位で切り上げ、1秒未満は1秒にします。注湯量は元のレシピの指定値を使います。
+Open **Settings → Language** to choose **日本語** or **English**. Japanese is the default.
+The choice is saved locally, applies immediately, and is shared with other open tabs.
+UI text, accessibility labels, dialogs, errors, dates, and durations follow the selected language.
+Your recipe text and existing brew records are preserved. Only the unsaved sample recipe changes
+language automatically.
 
-記録は localStorage に最新100件・約1 MB以内で保存し、上限や空き容量に応じて古いものから削除します。
-元のレシピを変更・削除しても、記録には抽出時の内容が残ります。
-記録はレシピのバックアップファイルには含まれません。
+## Brew records
 
-## レシピの保存とバックアップ
+Completing a brew automatically saves the recipe snapshot, timestamps, and actual step durations.
+Skipped steps record only the time up to the skip; pauses are added to the current step.
+Stopped or unfinished brews are not saved.
 
-レシピはブラウザーの localStorage に保存されます。
-端末・ブラウザー・アクセス先が異なると保存先も異なり、自動同期はされません。
-ブラウザーのデータ削除や機種変更に備えて、設定画面から JSON ファイルを保存してください。
+Open **Settings → View brew records** for a list of titles and start dates, then select a record for details.
+**Save as recipe** opens an editable copy using the measured durations, including pauses.
+Times are rounded up to whole seconds, with a minimum of one second. Water amounts remain the
+original recipe values; actual water quantities are not measured.
 
-バックアップの読み込みは、現在のレシピ一覧を置き換えます。
-ローカル環境から公開先へレシピを移す場合も、JSON の保存・読み込みを利用できます。
-詳しいファイル形式は [アプリの README](app/README.md#バックアップ形式) を参照してください。
+Records are stored separately in localStorage, limited to the latest 100 records and approximately 1 MB.
+Older records are removed as limits or storage pressure require. Editing or deleting the original recipe
+does not change existing records. Recipe backup files do not include brew records or language settings.
 
-## PWA とオフライン利用
+## Recipes and backups
 
-HTTPS の公開先で初回の読み込みと Service Worker の準備が完了すると、
-オフラインでもアプリを起動して、保存したレシピやタイマーを利用できます。
-Markdown に記載された外部画像やリンク先は、オフライン利用の対象外です。
+Storage is specific to the browser and site origin. Recipes do not sync automatically between devices,
+browsers, or local and deployed instances. Export a JSON backup from Settings before clearing browser
+data or changing devices.
 
-- Android / PC：対応ブラウザーのメニューからインストールします。
-- iPhone / iPad：Safari の共有メニューから「ホーム画面に追加」を選択します。
+Imports add recipes by default, with new IDs. Replace mode asks for confirmation before replacing the
+entire recipe list. See the [app documentation](app/README.md#backup-format) for the file format.
 
-使用中のタイマーや入力を守るため、自動リロードはしません。
-起動時、アプリに戻った時、オンライン復帰時、表示中は毎分、更新を確認します。
-更新版が利用できるとホームに「更新する」が表示され、押すと更新を反映します。
-抽出中や編集中にはリロードしません。
+## Local development
 
-## ローカル開発
-
-Node.js 24 と npm を推奨します。
-以下のコマンドは、すべてリポジトリのルートで実行してください。
+Use Node.js 24 and npm. Run these commands from the repository root:
 
 ```sh
 npm ci --prefix app
 npm run dev --prefix app
 ```
 
-表示されたローカル URL をブラウザーで開きます。
-開発サーバーでは Service Worker を無効にしています。
-PWA の動作を確認する場合は、本番ビルド後にプレビューを起動してください。
+Open the URL printed by Vite. The development server does not enable a service worker.
+To preview the production build and PWA:
 
 ```sh
 npm run build --prefix app
 npm run preview --prefix app
 ```
 
-## テストとビルド
-
-リポジトリのルートで実行します。
+## Checks and CI
 
 ```sh
 npm test --prefix app
@@ -112,20 +101,28 @@ npm run lint --prefix app
 npm run check:pwa --prefix app
 ```
 
-`check:pwa` は TypeScript の型チェック、本番ビルド、マニフェスト・アイコン・
-Service Worker のキャッシュ対象の検証を行います。ビルド結果は `app/dist` に生成されます。
+`check:pwa` runs TypeScript checks, a production build, and checks of the manifest, icons, registration,
+and precached assets. Output is written to `app/dist`.
 
-## CI
+[GitHub Actions](.github/workflows/ci.yml) runs on pull requests when opened, updated, or reopened,
+using Node.js 24. It installs dependencies and runs lint, tests, type checks, the production build, and
+PWA checks. Older runs for the same PR are cancelled. Pushes and merges to main do not trigger CI.
 
-[GitHub Actions](.github/workflows/ci.yml) で、PR の作成・コミット追加・再オープン時に検証します。
-Node.js 24 で依存関係をインストールし、lint、テスト、型チェック、本番ビルド、PWA チェックを実行します。
-同じ PR が更新された場合は、古い実行をキャンセルします。
-main へのマージや push では実行しません。
+## Installation and updates
 
-## Cloudflare への公開
+After the first successful HTTPS load and service worker setup, the app works offline.
+External images and links in Markdown require a network connection.
 
-Cloudflare Workers の Static Assets に公開できます。
-初回は、リポジトリのルートで依存関係のインストールと認証を行ってください。
+- Android / desktop: use the browser's install option.
+- iPhone / iPad: use Safari's share menu and **Add to Home Screen**.
+
+The app checks for updates on startup, foreground resume, reconnection, and every minute while visible.
+When an update is ready, an **Update** button appears on the home screen. Updates require confirmation;
+the app does not reload while you are brewing or editing, even when another tab activates an update.
+
+## Cloudflare deployment
+
+The app deploys to Cloudflare Workers Static Assets. From the repository root:
 
 ```sh
 npm ci --prefix deploy
@@ -133,20 +130,20 @@ npm run login --prefix deploy
 ./deploy/deploy.sh
 ```
 
-公開せずにビルドと設定を確認する場合は、`./deploy/deploy.sh --dry-run` を実行します。
-`deploy` ディレクトリ内で実行する場合のコマンドや、公開名・アカウントの指定方法は
-[公開手順](deploy/README.md) を参照してください。
+Use `./deploy/deploy.sh --dry-run` to validate without publishing.
+See [deployment instructions](deploy/README.md) for commands inside `deploy`, authentication,
+and deployment names.
 
-## プロジェクト構成
+## Project layout
 
-| ディレクトリ | 内容 |
+| Directory | Contents |
 | --- | --- |
-| `app/` | React / TypeScript / Vite による Web アプリケーション、テスト、PWA 設定 |
-| `deploy/` | Cloudflare 公開スクリプト、Wrangler 設定、公開手順 |
+| `app/` | React / TypeScript / Vite app, tests, translations, and PWA configuration |
+| `deploy/` | Cloudflare deployment script, Wrangler configuration, and instructions |
 
-React Compiler を有効にし、PWA の生成には Vite PWA、テストには Vitest と Testing Library を使用しています。
-アプリの詳細仕様と開発情報は [app/README.md](app/README.md) に記載しています。
+React Compiler is enabled. Vite PWA generates the service worker; Vitest and Testing Library run tests.
+See the [app documentation](app/README.md) for storage details and instructions for adding languages.
 
-## ライセンス
+## License
 
 [MIT License](LICENSE)

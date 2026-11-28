@@ -1,11 +1,11 @@
-# coffee timer
+# coffee timer app
 
-レシピに沿ってハンドドリップを案内する、日本語のコーヒータイマーです。
-React / TypeScript / Vite / React Compiler を使用し、サーバーなしで動作します。
+A browser-only pour-over timer built with React, TypeScript, Vite, and React Compiler.
+See the [project README](../README.md) for user-facing features and usage.
 
-## 開発
+## Development
 
-Node.js 24 を推奨します。
+Use Node.js 24 and npm:
 
 ```sh
 cd app
@@ -13,124 +13,9 @@ npm ci
 npm run dev
 ```
 
-表示されたローカル URL をブラウザーで開いてください。
-
-スマートフォンから同じネットワーク内の開発サーバーへ接続する場合は、
-`npm run dev -- --host 0.0.0.0` で起動し、表示された Network URL を開いてください。
-HTTP でもレシピ・タスクの ID を生成できます。PWA のインストールと Service Worker は HTTPS の公開先で確認してください。
-
-## 機能
-
-- ホームの「新しいレシピを作る」で登録。名前、説明、粉量、湯量、湯温、準備を記録できます。
-- 一覧の「並べ替え」から専用画面を開き、上下のボタンで調整して「順序を保存」で確定します。キャンセルもできます。保存した順序はバックアップにも含まれます。
-- 抽出・待機ステップを追加、削除、上下ボタンで並べ替えできます。
-- レシピの湯量と抽出ステップの合計が異なる場合、編集・詳細画面で警告します（お湯 1 ml ≒ 1 g）。警告があっても保存・抽出できます。
-- レシピの詳細画面から編集、削除、抽出開始ができます。
-- 説明・準備・ステップの説明は Markdown と改行に対応しています。HTML は実行しません。
-- タイマーは各ステップを自動で切り替え、終了時に通知音を鳴らします。
-- 抽出中はステップの残り時間と、前のステップまでの注湯量を含むスケールの累計値・目標を表示します。
-- 一時停止・再開、中止、ステップのスキップに対応しています。スキップした抽出ステップの注湯量は累計に含まれます。
-- 終了画面からレシピまたはホームに戻れます。
-- 設定から JSON のバックアップと読み込みができます。
-
-初回は基本のハンドドリップレシピを表示します。
-レシピの保存先はブラウザーの localStorage（`coffee-timer.recipes.v1`）です。
-同じ端末でもブラウザーやアクセス先が異なると、保存先も異なります。
-データ削除に備え、設定から定期的にバックアップしてください。
-保存前に、読み込み時のデータと現在の保存内容を比較します。
-別タブで変更されていた場合は上書きせず、入力を残して警告します。
-その場合は入力内容を控えてから再読み込みし、最新のレシピに変更を反映してください。
-
-## タイマーと通知音
-
-抽出開始の操作で Web Audio を有効にします。音が利用できない場合は画面に表示します。
-端末の音量を確認し、抽出中は画面を開いたまま使用してください。
-バックグラウンドやスリープ中の音声通知は保証されません。
-Screen Wake Lock API に対応した HTTPS 環境では、レシピの詳細画面での準備中から、抽出中と一時停止中まで画面の自動オフを防止します。
-抽出完了時やホーム・編集画面への移動時に解除し、レシピに戻ると再び防止します。
-別のタブやアプリから戻った際は再取得します。
-非対応、HTTP 接続、低バッテリーや省電力設定などで利用できない場合があります。
-手動の画面ロック、OS による強制終了やスリープまで無効にすることはできません。
-詳細は [Screen Wake Lock API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API) を参照してください。
-タイマーのコールバックが遅れた場合、再実行時に経過時間から現在のステップへ追従します。
-抽出画面の「全体」は一時停止を含む実測の経過時間と、残りの予定時間を加えた合計見込みです。
-一時停止中は経過時間・合計見込みが増え、スキップすると未実行の時間を合計見込みから差し引きます。
-
-ステップの時間は 1〜86400 秒の整数、抽出量は正の数で指定します。
-待機ステップには注湯量を設定しません。湯温は 0℃ より大きく 100℃ 以下です。
-
-## 画面遷移とブラウザー履歴
-
-React Router のハッシュルーティングを使用します。URL の例は `/#/settings`、
-`/#/recipes/house-blend` です。サーバーのリライトルールは不要で、オフライン起動にも対応します。
-ブラウザーの戻る・進むはアプリ内の画面遷移として扱います。
-
-抽出中は履歴移動を拒否し、表示中のタイマーを継続します。
-中止・完了画面のボタンからは通常どおり移動できます。
-再読み込みやページを閉じる操作には、ブラウザーが対応している場合に確認を表示します。
-実行途中のタイマーは永続化していないため、タイマーの URL を直接開いた場合や再読み込みした場合はレシピ詳細へ戻ります。
-未保存の編集・並べ替えは、画面を離れると破棄されます。
-
-ホームからサイト外へ戻る操作や OS のジェスチャーは、ルーターでは完全に防止できません。
-仕様は [React Router のハッシュルーティング](https://reactrouter.com/api/data-routers/createHashRouter) と
-[画面移動のブロック](https://reactrouter.com/api/hooks/useBlocker) を参照してください。
-
-## 抽出記録
-
-抽出完了時に、開始・完了日時、レシピのコピー、ステップごとの実行時間・一時停止時間・スキップの有無を記録します。
-各時間はミリ秒単位で保存し、画面では秒単位で表示します。
-スキップは押した時点までの実行時間を記録し、一時停止時間はその時点のステップに加算します。
-停止中にスキップした場合は次のステップも停止状態を保ち、その後の停止時間は次のステップに加算します。
-中止・再読み込み・アプリ終了による未完了の抽出は保存しません。
-
-設定の「抽出記録を見る」から一覧・詳細を開けます。URL は `/#/logs`、`/#/logs/{id}` です。
-完了画面にも実測した手順を表示します。詳細には元のレシピを削除・変更した後も抽出時の内容が残ります。
-注湯量はレシピの指定値であり、スケールの実測値は記録していません。
-
-詳細の「レシピとして保存」は、新しい ID のレシピを作り編集画面を開きます。
-各ステップの時間には実行時間と一時停止時間の合計を使い、秒単位で切り上げ、最短1秒とします。
-1ステップ86400秒を超える場合は、編集画面で時間を調整してから保存してください。
-
-保存先は localStorage の `coffee-timer.brew-logs.v1` で、レシピとは別管理です。
-最新100件かつ JSON 文字数 × 2 が1,000,000バイト以内となるよう、開始日時が古いものから整理します。
-容量不足の場合はさらに古い記録を減らして再試行し、それでも保存できなければ完了画面にエラーと再試行ボタンを表示します。
-書き込みが失敗した場合は、それまでに保存された記録を維持します。
-Web Locks API が使える環境ではタブ間の追加を直列化し、保存直前に最新の一覧を読み込みます。
-抽出記録はレシピの JSON バックアップには含まれません。
-
-## バックアップ形式
-
-JSON のトップレベルはレシピの配列です。各レシピは以下の項目を持ちます。
-
-```json
-[
-  {
-    "id": "my-recipe",
-    "name": "一杯分",
-    "description": "**いつものレシピ**\n中細挽き",
-    "coffee": 15,
-    "water": 250,
-    "temperature": 92,
-    "preparation": "フィルターをリンスする",
-    "tasks": [
-      { "id": "pour-1", "type": "pour", "description": "お湯を注ぐ", "seconds": 30, "amount": 250 },
-      {
-        "id": "wait-1",
-        "type": "wait",
-        "description": "落ちきるまで待つ",
-        "seconds": 60,
-        "amount": 0
-      }
-    ]
-  }
-]
-```
-
-読み込みは現在の一覧を置き換えます。確認ダイアログを表示し、形式を検証してから保存します。
-レシピ ID は一覧内、タスク ID は各レシピ内で一意にしてください。
-空の配列も読み込みできます。ファイルサイズは 5 MB 以下です。
-
-## 検証とビルド
+For access from a phone on the same network, run `npm run dev -- --host 0.0.0.0` and open the
+Network URL. Recipe and step IDs work over HTTP. PWA installation, service workers, and screen wake
+locks require an appropriate secure context; use the HTTPS deployment for device testing.
 
 ```sh
 npm test
@@ -140,30 +25,154 @@ npm run check:pwa
 npm run preview
 ```
 
-テストは Vitest / Testing Library / jsdom を使用します。
-`npm run build` は TypeScript の型チェックと本番ビルドを実行します。
-生成された `app/dist` は静的ファイル一式で、Cloudflare へのデプロイ用成果物になります。
-公開スクリプトと手順は [deploy/README.md](../deploy/README.md) を参照してください。
+Tests use Vitest, Testing Library, and jsdom. `build` runs TypeScript checks and creates `dist`.
+`check:pwa` also validates the manifest, PNG sizes, service worker registration, update activation,
+and precached assets. Use the production preview or HTTPS deployment for device-level PWA checks.
 
-## PWA（インストール・オフライン利用）
+## Localization
 
-HTTPS の公開先にアクセスすると、アプリ本体を端末にキャッシュします。
-初回の読み込みと Service Worker の準備が完了すれば、オフラインでも起動して
-レシピの作成・編集・抽出タイマーを利用できます。Markdown 内の外部画像やリンク先は対象外です。
+Japanese is the default. Settings provides a language selector; the preference is stored in
+`coffee-timer.language.v1`. Unsupported stored language codes fall back to Japanese.
+Changing language updates mounted components without navigating or discarding input.
+Language changes in another tab are synchronized through storage events.
 
-- Android / PC: 対応ブラウザーのメニューから「アプリをインストール」を選択します。
-- iPhone / iPad: Safari の共有メニューから「ホーム画面に追加」を選択します。
+- `src/locales/ja.ts`: source message keys and Japanese text
+- `src/locales/en.ts`: English catalog, checked against the source keys by TypeScript
+- `src/i18n.ts`: language registry, persistence, interpolation, formatting, and localized errors
+- `src/useI18n.ts`: React subscription and translation helpers
 
-使用中のタイマーや入力を守るため、自動リロードはしません。
-起動時、アプリへの復帰時、オンライン復帰時、表示中は毎分、更新を確認します。
-更新版を取得するとホームに「更新する」を表示し、押した後に新しい Service Worker の制御開始を待ってリロードします。
-別タブで更新されても、抽出中や編集中の画面はリロードしません。
-オフライン中の通知音も、画面を開いた状態で使用してください。
-インストールしても、スリープ中の通知やバックグラウンド動作を保証するものではありません。
+Components use `useI18n()` and `t('message.key', { parameter: value })`. Plain TypeScript helpers use
+`translate()`. Use `TranslationError` for errors that must remain translatable after a language change.
+Parameters are interpolated once as text; recipe names are never treated as translation keys or HTML.
+Numbers use `Intl.NumberFormat`; record dates use the locale registered for the selected language.
 
-開発サーバーでは Service Worker を有効にしません。
-`npm run check:pwa` は本番ビルドを行い、マニフェスト・PNG サイズ・登録コード・
-キャッシュ対象を確認します。実機の確認には `npm run preview` または HTTPS の公開先を使ってください。
+### Adding a language
 
-Workbox のビルド依存 `glob` は、既知の問題が修正された版に限定して上書きしています。
-更新ポリシーは [Vite PWA の仕様](https://vite-pwa-org.netlify.app/guide/prompt-for-update.html) を参照してください。
+1. Add `src/locales/<code>.ts`, exporting a `Record<keyof typeof ja, string>` catalog.
+2. Translate every key and keep the same named placeholders, such as `{count}` and `{name}`.
+   Translate complete sentences rather than joining fragments that depend on word order.
+3. Import the catalog in `src/i18n.ts` and add its code, native display name, locale, and messages to
+   `languages`. The Settings selector and supported-language type are derived from this registry.
+4. Run tests, lint, and `check:pwa`. Catalog tests check key and placeholder parity for all registered
+   languages; add UI coverage for any language-specific layout or formatting requirements.
+
+Saved recipe content and brew snapshots are user data and are not translated automatically.
+The unsaved sample recipe is localized dynamically. Saving it makes it normal recipe data, preserving
+the selected text thereafter. HTML language, title, and description follow the UI preference.
+The install manifest uses the language-neutral name `coffee timer` and an English description;
+changing the UI language does not rename an already installed app.
+
+## Recipes and validation
+
+Recipes are stored in localStorage under `coffee-timer.recipes.v1`.
+The initial sample is shown only when no saved recipe data exists.
+Recipe IDs are unique across the list, and task IDs are unique within a recipe.
+Names must not be blank. Steps take integer durations from 1 to 86400 seconds.
+Pour amounts must be positive; wait steps use zero water. Temperature must be greater than 0 and
+no more than 100 degrees Celsius.
+
+Markdown descriptions and preparation preserve line breaks. Embedded HTML is not executed.
+Water mismatches are advisory, comparing 1 ml of water with approximately 1 g; they do not block
+saving or brewing. Invalid numeric input is excluded from the comparison until corrected.
+
+Before saving, the app compares the current storage contents with its loaded snapshot.
+If another tab changed the data, saving is blocked and editor input is preserved. Copy your edits,
+reload, and apply them to the latest recipe list. Invalid saved data is not silently overwritten.
+
+## Timer and audio
+
+Starting a brew prepares Web Audio during the user interaction. If audio cannot be enabled, the
+timer still starts and explains the problem on screen. Leaving the recipe while audio is preparing
+cancels the pending start and closes its audio context.
+
+Steps advance automatically. The timer catches up using elapsed time when callbacks are delayed.
+Pause freezes the step countdown. Skip advances immediately, preserving pause state when paused.
+Skipped pour steps count their full specified water amount toward subsequent scale targets.
+**Overall** shows actual elapsed time including pauses and an estimated total based on that elapsed
+time plus the remaining planned duration. Skipping removes unexecuted time from the estimate.
+
+Audio uses media playback volume. Keep the app open while brewing; background execution and audio
+while sleeping are not guaranteed. Supported HTTPS browsers request a screen wake lock from recipe
+details through brewing, including pauses. It is released on completion or on leaving for home or
+the editor, and reacquired when returning to a recipe or to the visible tab.
+Unsupported environments, low battery, and power-saving settings may prevent acquisition.
+Manual locking and OS-forced sleep are not overridden. See the
+[Screen Wake Lock API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API).
+
+## Navigation
+
+React Router uses hash URLs such as `/#/settings` and `/#/recipes/house-blend`.
+No server rewrite rules are needed, including for offline startup.
+Browser back/forward navigates within the app, but history changes are blocked during brewing.
+Stop and completion buttons provide explicit navigation. Browsers may show a confirmation when
+reloading or closing an active timer.
+
+In-progress sessions are not persisted. Opening or reloading a timer URL returns to recipe details.
+Unsaved editor and ordering changes are discarded when leaving their screen.
+The router cannot fully prevent leaving the site from home or OS-level app gestures.
+See [hash routing](https://reactrouter.com/api/data-routers/createHashRouter) and
+[navigation blocking](https://reactrouter.com/api/hooks/useBlocker).
+
+## Brew records
+
+Completing a brew records start/end timestamps, a recipe snapshot, and each step's active duration,
+paused duration, and skipped flag. Durations are stored in milliseconds and displayed in seconds.
+Skipping records time up to the click. Pauses belong to the current step. When skipping while paused,
+subsequent paused time belongs to the next step. Stopped, reloaded, or abandoned sessions are not saved.
+
+The completion screen displays actual steps. Settings links to the record list and details at
+`/#/logs` and `/#/logs/{id}`. Records retain the original contents even after a recipe is edited or deleted.
+Water amounts are specified recipe values; no scale measurements are recorded.
+
+**Save as recipe** creates a new ID and opens an editable copy. Step durations include both active and
+paused time, rounded up to whole seconds with a minimum of one second. If a step exceeds 86400 seconds,
+adjust it in the editor before saving.
+
+Records are stored separately under `coffee-timer.brew-logs.v1`. Retention keeps the latest 100 entries
+and limits JSON length times two to 1,000,000 bytes. Oldest start timestamps are removed first.
+Quota errors trigger retries with fewer old records. If saving still fails, the completion screen shows
+an error and retry button. Failed writes preserve previously stored data.
+Where available, Web Locks serialize cross-tab appends, reading the latest records before writing.
+Records and language preferences are not included in recipe backup files.
+
+## Backup format
+
+The JSON root is an array of recipes:
+
+```json
+[
+  {
+    "id": "my-recipe",
+    "name": "One cup",
+    "description": "**Everyday recipe**\nMedium-fine grind",
+    "coffee": 15,
+    "water": 250,
+    "temperature": 92,
+    "preparation": "Rinse the filter",
+    "tasks": [
+      { "id": "pour-1", "type": "pour", "description": "Pour water", "seconds": 30, "amount": 250 },
+      { "id": "wait-1", "type": "wait", "description": "Let it drain", "seconds": 60, "amount": 0 }
+    ]
+  }
+]
+```
+
+Imports validate the entire file before saving. Files must be no larger than 5 MB.
+The preview defaults to adding recipes, assigning new recipe IDs. Importing again adds duplicates.
+Replace mode asks for confirmation and accepts an empty array to clear the list.
+The exported format and storage keys are identical in every UI language.
+
+## PWA and deployment
+
+The first successful HTTPS load precaches the app for offline use. External Markdown images and links
+are not included. Android and desktop browsers offer installation; on iPhone/iPad, use Safari's
+**Add to Home Screen**.
+
+The app checks for updates at startup, foreground resume, reconnection, and every minute while visible.
+A ready update appears on home. After confirmation, it waits for the new worker to take control before
+reloading. Updates activated in other tabs do not reload a timer or editor without approval on home.
+The development server disables service workers.
+
+Workbox's build dependency `glob` is overridden to a version with known vulnerabilities fixed.
+See [Vite PWA update behavior](https://vite-pwa-org.netlify.app/guide/prompt-for-update.html).
+The generated `dist` directory is a static site; see [deployment instructions](../deploy/README.md).
