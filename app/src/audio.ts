@@ -1,3 +1,5 @@
+import { TranslationError } from './i18n'
+
 export function closeAudio(context: AudioContext | null) {
   if (context && context.state !== 'closed') {
     void context.close().catch((error) => console.warn('Could not close audio context', error))
@@ -6,7 +8,7 @@ export function closeAudio(context: AudioContext | null) {
 
 export async function prepareAudio(signal?: AbortSignal) {
   if (signal?.aborted) throw new DOMException('Audio preparation cancelled', 'AbortError')
-  if (!window.AudioContext) throw new Error('このブラウザーは通知音に対応していません。')
+  if (!window.AudioContext) throw new TranslationError('audio.unsupported')
   const context = new AudioContext()
   const onAbort = () => closeAudio(context)
   signal?.addEventListener('abort', onAbort, { once: true })

@@ -1,5 +1,6 @@
 import { createId } from './createId'
 import { parseRecipes, type Recipe } from './recipes'
+import { getLanguage, languages, translate, TranslationError } from './i18n'
 
 export type BrewStepLog = {
   taskId: string
@@ -22,8 +23,10 @@ export const MAX_LOG_BYTES = 1_000_000
 export const stepDuration = (step: BrewStepLog) => step.activeMs + step.pausedMs
 export const logDuration = (log: BrewLog) =>
   log.steps.reduce((sum, step) => sum + stepDuration(step), 0)
-export const durationText = (ms: number) => `${Number((ms / 1000).toFixed(1))} 秒`
-export const logDate = (value: string) => new Date(value).toLocaleString('ja-JP', { hour12: false })
+export const durationText = (ms: number) =>
+  translate('common.seconds', { value: Number((ms / 1000).toFixed(1)) })
+export const logDate = (value: string) =>
+  new Date(value).toLocaleString(languages[getLanguage()].locale, { hour12: false })
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -80,7 +83,7 @@ export function parseBrewLogs(value: unknown): BrewLog[] {
     !value.every(isLog) ||
     new Set(value.map((log) => log.id)).size !== value.length
   ) {
-    throw new Error('抽出記録の形式が正しくありません。保存データを確認してください。')
+    throw new TranslationError('history.invalid')
   }
   return value
 }
@@ -94,7 +97,7 @@ function boundedLogs(logs: BrewLog[]) {
   const next = logs.slice(0, MAX_LOGS)
   while (next.length > 1 && JSON.stringify(next).length * 2 > MAX_LOG_BYTES) next.pop()
   if (JSON.stringify(next).length * 2 > MAX_LOG_BYTES) {
-    throw new Error('この抽出記録は大きすぎるため保存できません。')
+    throw new TranslationError('history.large')
   }
   return next
 }
@@ -134,7 +137,7 @@ export function recipeFromLog(log: BrewLog): Recipe {
   return {
     ...log.recipe,
     id: createId(),
-    name: `${log.recipe.name}（抽出記録）`.slice(0, 100),
+    name: translate('history.recipeName', { name: log.recipe.name }).slice(0, 100),
     tasks: log.recipe.tasks.map((task, index) => ({
       ...task,
       id: createId(),

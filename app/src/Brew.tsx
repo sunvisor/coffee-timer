@@ -5,6 +5,7 @@ import { ScreenAwake } from './ScreenAwake'
 import { formatTime, type Recipe } from './recipes'
 import { useBrew } from './useBrew'
 import { BrewCompletion } from './BrewCompletion'
+import { useI18n } from './useI18n'
 
 export function Brew({
   recipe,
@@ -17,6 +18,7 @@ export function Brew({
   onExit: () => void
   onHome: () => void
 }) {
+  const { t, number } = useI18n()
   const { elapsed, total, paused, pause, progress, log, skip } = useBrew(recipe, audio)
   const task = recipe.tasks[progress.index]
   if (log) return <BrewCompletion log={log} onExit={onExit} onHome={onHome} />
@@ -25,23 +27,21 @@ export function Brew({
       <div className="panel brew-panel">
         <div className="section-heading">
           <span className="eyebrow">
-            STEP {String(progress.index + 1).padStart(2, '0')} /{' '}
-            {String(recipe.tasks.length).padStart(2, '0')}
+            {t('brew.step', {
+              number: String(progress.index + 1).padStart(2, '0'),
+              count: String(recipe.tasks.length).padStart(2, '0'),
+            })}
           </span>
           <span>{recipe.name}</span>
         </div>
         <div className="brew-status" role="status" aria-live="polite">
-          {paused
-            ? '一時停止中'
-            : task.type === 'pour'
-              ? 'お湯を注ぎましょう'
-              : 'ゆっくり待ちましょう'}
+          {paused ? t('brew.paused') : task.type === 'pour' ? t('brew.pour') : t('brew.wait')}
         </div>
         <div className="timer-controls">
           <BrewControls
             paused={paused}
             onStop={() => {
-              if (window.confirm('抽出を終了してレシピに戻りますか？')) onExit()
+              if (window.confirm(t('brew.stopConfirm'))) onExit()
             }}
             onPause={pause}
             onSkip={skip}
@@ -51,7 +51,7 @@ export function Brew({
             style={{ '--progress': `${progress.progress * 360}deg` } as CSSProperties}
           >
             <div>
-              <span className="muted">このステップの残り時間</span>
+              <span className="muted">{t('brew.remaining')}</span>
               <strong className="countdown" role="timer">
                 {formatTime(progress.remaining)}
               </strong>
@@ -61,25 +61,23 @@ export function Brew({
         </div>
         {task.type === 'pour' ? (
           <div className="pour-amount">
-            <span>スケールの表示の目安（累計）</span>
+            <span>{t('brew.scale')}</span>
             <strong>
-              {Math.floor(progress.poured + progress.amount)}
-              <small> / {progress.poured + task.amount} g</small>
+              {number(Math.floor(progress.poured + progress.amount))}
+              <small> / {number(progress.poured + task.amount)} g</small>
             </strong>
-            <span>このステップで注ぐ量：{task.amount} g</span>
+            <span>{t('brew.amount', { amount: task.amount })}</span>
           </div>
         ) : (
-          <p className="wait-message">おいしさが引き出されるのを待ちましょう。</p>
+          <p className="wait-message">{t('brew.waitHint')}</p>
         )}
         <Markdown>{task.description}</Markdown>
         <div className="brew-total">
-          全体 {formatTime(Math.floor(elapsed))} / {formatTime(total)}
+          {t('brew.total', { elapsed: formatTime(Math.floor(elapsed)), total: formatTime(total) })}
         </div>
       </div>
       <div className="brew-notes">
-        <p className="muted">
-          ステップは自動で切り替わります。通知音が聞こえる音量にし、この画面を開いたままお使いください。
-        </p>
+        <p className="muted">{t('brew.hint')}</p>
         <ScreenAwake />
       </div>
     </section>

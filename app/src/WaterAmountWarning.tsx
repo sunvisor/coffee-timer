@@ -1,6 +1,8 @@
 import { totalPourAmount, type Recipe } from './recipes'
+import { useI18n } from './useI18n'
 
 export function WaterAmountWarning({ recipe }: { recipe: Recipe }) {
+  const { t } = useI18n()
   const total = totalPourAmount(recipe.tasks)
   const valid =
     Number.isFinite(recipe.water) &&
@@ -13,11 +15,11 @@ export function WaterAmountWarning({ recipe }: { recipe: Recipe }) {
   if (!valid || !Number.isFinite(total) || Math.abs(total - recipe.water) <= tolerance) return null
   return (
     <p className="water-warning" role="status">
-      <strong>お湯の量が一致していません。</strong>
+      <strong>{t('water.mismatch')}</strong>
       <br />
-      レシピは {recipe.water} ml、抽出タスクの合計は {Number(total.toPrecision(15))} g です。
+      {t('water.amounts', { water: recipe.water, total: Number(total.toPrecision(15)) })}
       <br />
-      お湯 1 ml ≒ 1 g として比較しています。量を確認してください。
+      {t('water.hint')}
     </p>
   )
 }

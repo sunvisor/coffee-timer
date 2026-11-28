@@ -2,6 +2,8 @@ import { useRef, useState, type ChangeEvent } from 'react'
 import { parseRecipes, type Recipe } from './recipes'
 import { createId } from './createId'
 import { RecipeImport, type ImportMode } from './RecipeImport'
+import { errorText, isLanguage, languages, setLanguage, TranslationError } from './i18n'
+import { useI18n } from './useI18n'
 
 export function Settings({
   recipes,
@@ -10,9 +12,13 @@ export function Settings({
   recipes: Recipe[]
   onImport: (recipes: Recipe[]) => boolean
 }) {
+  const { t, language } = useI18n()
   const input = useRef<HTMLInputElement>(null)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
+  const [message, setMessage] = useState<{ mode: ImportMode; count: number; total: number } | null>(
+    null,
+  )
+  const [error, setError] = useState<unknown>(null)
+  const [languageError, setLanguageError] = useState(false)
   const [pending, setPending] = useState<{ filename: string; recipes: Recipe[] } | null>(null)
   function download() {
     const url = URL.createObjectURL(
@@ -28,68 +34,94 @@ export function Settings({
     const target = event.target
     const file = target.files?.[0]
     if (!file) return
-    setError('')
-    setMessage('')
+    setError(null)
+    setMessage(null)
     setPending(null)
     try {
-      if (file.size > 5_000_000) throw new Error('5 MB 以下のファイルを選択してください。')
+      if (file.size > 5_000_000) throw new TranslationError('import.large')
       const imported = parseRecipes(JSON.parse(await file.text()))
       setPending({ filename: file.name, recipes: imported })
     } catch (reason) {
-      setError(
-        reason instanceof SyntaxError
-          ? 'JSON を読み取れません。ファイルの内容を確認してください。'
-          : reason instanceof Error
-            ? reason.message
-            : 'ファイルを読み込めませんでした。',
-      )
+      setError(reason instanceof SyntaxError ? new TranslationError('import.json') : reason)
     }
     target.value = ''
   }
   function confirmImport(mode: ImportMode) {
     if (!pending) return
     const count = pending.recipes.length
-    if (mode === 'replace' && !window.confirm(
-      `現在の ${recipes.length} 件のレシピを削除し、${count} 件のレシピに置き換えます。よろしいですか？`,
-    )) return
-    const next = mode === 'add'
-      ? [...recipes, ...pending.recipes.map((recipe) => ({ ...recipe, id: createId() }))]
-      : pending.recipes
+    if (
+      mode === 'replace' &&
+      !window.confirm(t('import.confirm', { current: recipes.length, count }))
+    )
+      return
+    const next =
+      mode === 'add'
+        ? [...recipes, ...pending.recipes.map((recipe) => ({ ...recipe, id: createId() }))]
+        : pending.recipes
     if (!onImport(next)) return
-    setMessage(mode === 'add'
-      ? `${count} 件を追加しました。合計 ${next.length} 件になりました。`
-      : `${count} 件のレシピに置き換えました。`)
+    setMessage({ mode, count, total: next.length })
     setPending(null)
   }
   return (
     <div className="settings">
       <section className="panel">
-        <span className="eyebrow">BACKUP & RESTORE</span>
-        <h2>レシピを、大切に。</h2>
+        <h2>{t('settings.language')}</h2>
+        <p>{t('settings.languageHint')}</p>
+        <label>
+          {t('settings.language')}
+          <select
+            value={language}
+            onChange={(event) => {
+              if (!isLanguage(event.target.value)) return
+              try {
+                setLanguage(event.target.value)
+                setLanguageError(false)
+              } catch (reason) {
+                console.warn('Could not save language preference', reason)
+                setLanguageError(true)
+              }
+            }}
+          >
+            {Object.entries(languages).map(([code, value]) => (
+              <option key={code} value={code} lang={code}>
+                {value.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {languageError && (
+          <p className="error" role="alert">
+            {t('settings.languageFailed')}
+          </p>
+        )}
+      </section>
+      <section className="panel">
+        <span className="eyebrow">{t('eyebrow.backup')}</span>
+        <h2>{t('settings.title')}</h2>
         <p>
-          レシピはこのブラウザーに保存されます。
+          {t('settings.local')}
           <br />
-          機種変更やブラウザーのデータ削除に備えて、バックアップしておきましょう。
+          {t('settings.backupHint')}
         </p>
         <div className="setting-row">
           <div>
-            <h3>レシピの保存</h3>
-            <p>すべてのレシピをファイルに書き出します。</p>
+            <h3>{t('settings.export')}</h3>
+            <p>{t('settings.exportHint')}</p>
           </div>
-          <button onClick={download}>ダウンロード</button>
+          <button onClick={download}>{t('settings.download')}</button>
         </div>
         <div className="setting-row">
           <div>
-            <h3>レシピの読み込み</h3>
-            <p>保存したレシピファイルを選び、追加または置き換えを選択します。</p>
+            <h3>{t('settings.import')}</h3>
+            <p>{t('settings.importHint')}</p>
           </div>
-          <button onClick={() => input.current?.click()}>ファイルを選択</button>
+          <button onClick={() => input.current?.click()}>{t('settings.choose')}</button>
         </div>
         <input
           ref={input}
           type="file"
           accept=".json,application/json"
-          aria-label="レシピファイル"
+          aria-label={t('settings.file')}
           hidden
           onChange={upload}
         />
@@ -104,16 +136,16 @@ export function Settings({
         )}
         {message && (
           <p role="status" className="success">
-            {message}
+            {t(message.mode === 'add' ? 'import.added' : 'import.replaced', message)}
           </p>
         )}
-        {error && (
+        {error != null && (
           <p role="alert" className="error">
-            {error}
+            {errorText(error, 'import.failed')}
           </p>
         )}
       </section>
-      <p className="muted">アカウント登録不要。レシピがサーバーへ送信されることはありません。</p>
+      <p className="muted">{t('settings.privacy')}</p>
     </div>
   )
 }

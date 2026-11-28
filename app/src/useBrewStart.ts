@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { closeAudio, prepareAudio } from './audio'
 import type { Recipe } from './recipes'
 
-type OnStart = (recipe: Recipe, audio: AudioContext | null, error: string) => void
+type OnStart = (recipe: Recipe, audio: AudioContext | null, failed: boolean) => void
 
 export function useBrewStart(onStart: OnStart) {
   const { key } = useLocation()
@@ -22,17 +22,17 @@ export function useBrewStart(onStart: OnStart) {
     const controller = new AbortController()
     current.current = controller
     let audio: AudioContext | null = null
-    let error = ''
+    let failed = false
     try {
       audio = await prepareAudio(controller.signal)
     } catch {
-      error = '通知音を有効にできませんでした。画面で残り時間を確認してください。'
+      failed = true
     }
     if (controller.signal.aborted) {
       closeAudio(audio)
       return
     }
-    onStart(recipe, audio, error)
+    onStart(recipe, audio, failed)
   }
   return { start, cancel }
 }

@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import { BrewLogSteps } from './BrewLogView'
 import { logDate, saveBrewLog, type BrewLog } from './brewLogs'
+import { useI18n } from './useI18n'
 
 async function persist(log: BrewLog) {
   try {
     await saveBrewLog(log)
-    return ''
+    return false
   } catch (reason) {
     console.warn('Could not save brew log', reason)
-    return '抽出記録を保存できませんでした。保存許可や空き容量を確認して再試行してください。'
+    return true
   }
 }
 
@@ -21,7 +22,8 @@ export function BrewCompletion({
   onExit: () => void
   onHome: () => void
 }) {
-  const [error, setError] = useState('')
+  const { t } = useI18n()
+  const [error, setError] = useState(false)
   useEffect(() => {
     let active = true
     void persist(log).then((message) => {
@@ -33,28 +35,28 @@ export function BrewCompletion({
   }, [log])
   return (
     <section className="completion panel">
-      <span className="eyebrow">BREW COMPLETE</span>
-      <h1>美味しいコーヒーをどうぞ。</h1>
-      <p>お疲れ様でした。淹れたての一杯を楽しんでください。</p>
+      <span className="eyebrow">{t('eyebrow.complete')}</span>
+      <h1>{t('brew.complete')}</h1>
+      <p>{t('brew.enjoy')}</p>
       <p className="completion-summary">
         {log.recipe.name} · {logDate(log.startedAt)}
         <br />
-        {log.recipe.coffee} g のコーヒー · {log.recipe.water} ml のお湯
+        {t('brew.summary', { coffee: log.recipe.coffee, water: log.recipe.water })}
       </p>
       {error && (
         <div>
           <p className="error" role="alert">
-            {error}
+            {t('history.saveFailed')}
           </p>
-          <button onClick={() => void persist(log).then(setError)}>記録の保存を再試行</button>
+          <button onClick={() => void persist(log).then(setError)}>{t('history.retry')}</button>
         </div>
       )}
       <BrewLogSteps log={log} />
       <div className="actions completion-actions">
         <button className="primary" onClick={onExit}>
-          レシピに戻る
+          {t('brew.back')}
         </button>
-        <button onClick={onHome}>ホームに戻る</button>
+        <button onClick={onHome}>{t('nav.home')}</button>
       </div>
     </section>
   )

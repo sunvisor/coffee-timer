@@ -14,10 +14,10 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         id: '/',
-        name: 'coffee timer | 一杯を、ていねいに。',
+        name: 'coffee timer',
         short_name: 'coffee timer',
-        description: 'レシピとタイマーで、いつものコーヒーをもっとおいしく。',
-        lang: 'ja',
+        description: 'Brew a better cup with your recipes and a step-by-step timer.',
+        lang: 'en',
         start_url: '/',
         scope: '/',
         display: 'standalone',
