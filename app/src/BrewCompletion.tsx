@@ -8,7 +8,7 @@ async function persist(log: BrewLog) {
     return ''
   } catch (reason) {
     console.warn('Could not save brew log', reason)
-    return '抽出ログを保存できませんでした。保存許可や空き容量を確認して再試行してください。'
+    return '抽出記録を保存できませんでした。保存許可や空き容量を確認して再試行してください。'
   }
 }
 
@@ -46,7 +46,7 @@ export function BrewCompletion({
           <p className="error" role="alert">
             {error}
           </p>
-          <button onClick={() => void persist(log).then(setError)}>ログの保存を再試行</button>
+          <button onClick={() => void persist(log).then(setError)}>記録の保存を再試行</button>
         </div>
       )}
       <BrewLogSteps log={log} />

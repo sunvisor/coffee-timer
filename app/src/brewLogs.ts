@@ -80,7 +80,7 @@ export function parseBrewLogs(value: unknown): BrewLog[] {
     !value.every(isLog) ||
     new Set(value.map((log) => log.id)).size !== value.length
   ) {
-    throw new Error('抽出ログの形式が正しくありません。保存データを確認してください。')
+    throw new Error('抽出記録の形式が正しくありません。保存データを確認してください。')
   }
   return value
 }
@@ -94,7 +94,7 @@ function boundedLogs(logs: BrewLog[]) {
   const next = logs.slice(0, MAX_LOGS)
   while (next.length > 1 && JSON.stringify(next).length * 2 > MAX_LOG_BYTES) next.pop()
   if (JSON.stringify(next).length * 2 > MAX_LOG_BYTES) {
-    throw new Error('この抽出ログは大きすぎるため保存できません。')
+    throw new Error('この抽出記録は大きすぎるため保存できません。')
   }
   return next
 }
@@ -134,7 +134,7 @@ export function recipeFromLog(log: BrewLog): Recipe {
   return {
     ...log.recipe,
     id: createId(),
-    name: `${log.recipe.name}（抽出ログ）`.slice(0, 100),
+    name: `${log.recipe.name}（抽出記録）`.slice(0, 100),
     tasks: log.recipe.tasks.map((task, index) => ({
       ...task,
       id: createId(),

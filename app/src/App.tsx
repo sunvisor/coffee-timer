@@ -240,7 +240,7 @@ function App() {
             <section className="panel">
               <h2>抽出の記録</h2>
               <p>実際に淹れた手順を振り返り、新しいレシピにできます。</p>
-              <button onClick={() => setScreen({ type: 'logs' })}>抽出ログを見る</button>
+              <button onClick={() => setScreen({ type: 'logs' })}>抽出記録を見る</button>
             </section>
           </>
         )}
