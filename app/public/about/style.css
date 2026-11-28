@@ -446,6 +446,14 @@ details p {
   gap: 22px;
   flex-wrap: wrap;
 }
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.github-link svg {
+  flex-shrink: 0;
+}
 .skip-link {
   position: absolute;
   top: -100px;

@@ -66,6 +66,7 @@ for (const path of [
   'about/en/index.html',
   'about/style.css',
   'about/open-app.js',
+  'icons.svg',
 ]) {
   assert.ok(cached.has(path), `Missing promotional page asset: ${path}`)
   await read(path)
