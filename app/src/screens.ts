@@ -1,7 +1,8 @@
 import type { Recipe } from './recipes'
 
 export type Screen =
-  | { type: 'home' | 'settings' | 'order' | 'not-found' }
+  | { type: 'home' | 'settings' | 'order' | 'logs' | 'not-found' }
+  | { type: 'log'; id: string }
   | { type: 'detail' | 'edit'; recipe: Recipe }
   | { type: 'brew'; recipe: Recipe; audio: AudioContext | null }
 
@@ -15,6 +16,10 @@ export function screenPath(screen: Screen, recipes: Recipe[]) {
       return '/settings'
     case 'order':
       return '/order'
+    case 'logs':
+      return '/logs'
+    case 'log':
+      return `/logs/${encodeURIComponent(screen.id)}`
     case 'not-found':
       return '/404'
     case 'edit':
@@ -37,6 +42,15 @@ export function resolveScreen(
   if (path === '/') return { type: 'home' }
   if (path === '/settings') return { type: 'settings' }
   if (path === '/order') return { type: 'order' }
+  if (path === '/logs') return { type: 'logs' }
+  const logMatch = /^\/logs\/([^/]+)$/.exec(path)
+  if (logMatch) {
+    try {
+      return { type: 'log', id: decodeURIComponent(logMatch[1]) }
+    } catch {
+      return { type: 'not-found' }
+    }
+  }
   if (path === '/new') return { type: 'edit', recipe: draft }
   const match = /^\/recipes\/([^/]+)(?:\/(edit|brew))?$/.exec(path)
   const recipe = match && recipes.find((item) => encodeURIComponent(item.id) === match[1])

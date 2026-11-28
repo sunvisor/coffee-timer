@@ -1,39 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { type CSSProperties } from 'react'
 import { Markdown } from './Markdown'
 import { BrewControls } from './BrewControls'
 import { ScreenAwake } from './ScreenAwake'
-import { ring } from './audio'
-import { formatTime, getBrewProgress, totalSeconds, type Recipe } from './recipes'
-
-function useBrew(recipe: Recipe, audio: AudioContext | null) {
-  const [elapsed, setElapsed] = useState(0)
-  const [paused, setPaused] = useState(false)
-  const clock = useRef({ start: 0, elapsed: 0, previous: 0 })
-  const progress = getBrewProgress(recipe.tasks, elapsed)
-  const done = progress.index === recipe.tasks.length
-  useEffect(() => {
-    if (paused || done) return
-    clock.current.start = Date.now() - clock.current.elapsed * 1000
-    const timer = window.setInterval(() => {
-      clock.current.elapsed = (Date.now() - clock.current.start) / 1000
-      setElapsed(clock.current.elapsed)
-    }, 50)
-    return () => window.clearInterval(timer)
-  }, [paused, done])
-  useEffect(() => {
-    if (progress.index > clock.current.previous && audio) ring(audio)
-    clock.current.previous = progress.index
-  }, [progress.index, audio])
-  function skip() {
-    const next = recipe.tasks
-      .slice(0, progress.index + 1)
-      .reduce((sum, task) => sum + task.seconds, 0)
-    clock.current.elapsed = next
-    clock.current.start = Date.now() - next * 1000
-    setElapsed(next)
-  }
-  return { elapsed, paused, setPaused, progress, done, skip }
-}
+import { formatTime, totalSeconds, type Recipe } from './recipes'
+import { useBrew } from './useBrew'
+import { BrewCompletion } from './BrewCompletion'
 
 export function Brew({
   recipe,
@@ -46,30 +17,9 @@ export function Brew({
   onExit: () => void
   onHome: () => void
 }) {
-  const { elapsed, paused, setPaused, progress, done, skip } = useBrew(recipe, audio)
+  const { elapsed, paused, pause, progress, log, skip } = useBrew(recipe, audio)
   const task = recipe.tasks[progress.index]
-  if (done)
-    return (
-      <section className="completion panel">
-        <span className="eyebrow">BREW COMPLETE</span>
-        <h1>美味しいコーヒーをどうぞ。</h1>
-        <p>
-          お疲れ様でした。
-          <br />
-          ひと息ついて、淹れたての一杯を楽しみましょう。
-        </p>
-        <p className="completion-summary">
-          {recipe.coffee} g のコーヒー · {recipe.water} ml のお湯 ·{' '}
-          {formatTime(totalSeconds(recipe))}
-        </p>
-        <div className="actions completion-actions">
-          <button className="primary" onClick={onExit}>
-            レシピに戻る
-          </button>
-          <button onClick={onHome}>ホームに戻る</button>
-        </div>
-      </section>
-    )
+  if (log) return <BrewCompletion log={log} onExit={onExit} onHome={onHome} />
   return (
     <section className="brew">
       <div className="panel brew-panel">
@@ -93,7 +43,7 @@ export function Brew({
             onStop={() => {
               if (window.confirm('抽出を終了してレシピに戻りますか？')) onExit()
             }}
-            onPause={() => setPaused(!paused)}
+            onPause={pause}
             onSkip={skip}
           />
           <div

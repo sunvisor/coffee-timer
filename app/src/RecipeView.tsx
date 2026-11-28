@@ -3,7 +3,13 @@ import { formatTime, totalPourAmount, totalSeconds, type Recipe } from './recipe
 import { WaterAmountWarning } from './WaterAmountWarning'
 import { ScreenAwake } from './ScreenAwake'
 
-export function RecipeStats({ recipe }: { recipe: Recipe }) {
+export function RecipeStats({
+  recipe,
+  seconds = totalSeconds(recipe),
+}: {
+  recipe: Recipe
+  seconds?: number
+}) {
   return (
     <dl className="recipe-stats">
       <div>
@@ -29,7 +35,7 @@ export function RecipeStats({ recipe }: { recipe: Recipe }) {
       </div>
       <div>
         <dt>抽出時間</dt>
-        <dd>{formatTime(totalSeconds(recipe))}</dd>
+        <dd>{formatTime(seconds)}</dd>
       </div>
     </dl>
   )

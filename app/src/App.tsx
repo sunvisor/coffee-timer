@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { version } from '../package.json'
 import { Brew } from './Brew'
+import { BrewHistory } from './BrewHistory'
 import { closeAudio } from './audio'
 import { Markdown } from './Markdown'
 import { RecipeEditor } from './RecipeEditor'
@@ -236,7 +237,20 @@ function App() {
               <h1>設定</h1>
             </div>
             <Settings recipes={recipes} onImport={save} />
+            <section className="panel">
+              <h2>抽出の記録</h2>
+              <p>実際に淹れた手順を振り返り、新しいレシピにできます。</p>
+              <button onClick={() => setScreen({ type: 'logs' })}>抽出ログを見る</button>
+            </section>
           </>
+        )}
+        {(screen.type === 'logs' || screen.type === 'log') && (
+          <BrewHistory
+            id={screen.type === 'log' ? screen.id : undefined}
+            onSelect={(id) => setScreen({ type: 'log', id })}
+            onRecipe={(recipe) => setScreen({ type: 'edit', recipe })}
+            onBack={() => setScreen({ type: screen.type === 'log' ? 'logs' : 'settings' })}
+          />
         )}
         {screen.type === 'not-found' && (
           <section className="panel">

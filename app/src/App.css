@@ -702,6 +702,26 @@ main {
   text-align: center;
   padding-block: 80px;
 }
+.log-list {
+  list-style: none;
+  padding: 0;
+}
+.log-link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.log-link time {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.log-steps {
+  text-align: left;
+  overflow-wrap: anywhere;
+}
 .completion h1 {
   margin: 25px 0;
 }
