@@ -48,11 +48,13 @@ export function RecipeView({
   onStart,
   onEdit,
   onDelete,
+  onBack,
 }: {
   recipe: Recipe
   onStart: () => void
   onEdit: () => void
   onDelete: () => void
+  onBack: () => void
 }) {
   const { t } = useI18n()
   return (
@@ -99,6 +101,7 @@ export function RecipeView({
         </ol>
       </section>
       <div className="detail-footer">
+        <button onClick={onBack}>{t('common.back')}</button>
         <div className="actions">
           <button onClick={onEdit}>{t('common.edit')}</button>
           <button className="danger" onClick={onDelete}>

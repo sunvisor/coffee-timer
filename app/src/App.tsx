@@ -225,6 +225,7 @@ function App() {
             onStart={() => void start(screen.recipe)}
             onEdit={() => setScreen({ type: 'edit', recipe: screen.recipe })}
             onDelete={() => remove(screen.recipe)}
+            onBack={() => setScreen({ type: 'home' })}
           />
         )}
         {screen.type === 'edit' && (

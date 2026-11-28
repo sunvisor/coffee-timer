@@ -18,6 +18,7 @@ export const ja = {
   'nav.breadcrumbs': 'パンくずリスト',
   'nav.settings': '設定',
   'common.cancel': 'キャンセル',
+  'common.back': '戻る',
   'common.delete': '削除',
   'common.edit': '編集',
   'common.steps': '{count} ステップ',
