@@ -99,7 +99,7 @@ describe('language settings', () => {
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('en')
     expect(document.documentElement.lang).toBe('en')
     expect(document.title).toContain('A little ritual')
-    fireEvent.click(screen.getByRole('button', { name: 'Back to home' }))
+    fireEvent.click(screen.getByRole('link', { name: 'Home' }))
     fireEvent.click(screen.getByRole('button', { name: 'Everyday pour-over (Sample)' }))
     expect(
       screen.getByText('Wet all the grounds, pouring in small circles from the center.'),
@@ -121,7 +121,7 @@ describe('language settings', () => {
     fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
     expect(screen.getByRole('button', { name: 'Start brewing' })).toBeTruthy()
     expect(localStorage.getItem(STORAGE_KEY)).toBe(stored)
-    fireEvent.click(screen.getByRole('button', { name: 'Back to home' }))
+    fireEvent.click(screen.getByRole('link', { name: 'Home' }))
     fireEvent.click(screen.getByRole('button', { name: /Create a recipe/ }))
     fireEvent.change(screen.getByLabelText('Recipe name'), { target: { value: 'English test' } })
     fireEvent.click(screen.getByRole('button', { name: '+ Add step' }))
@@ -129,7 +129,7 @@ describe('language settings', () => {
     expect(screen.getByRole('status').textContent).toContain('Water amounts do not match')
     expect(screen.getByLabelText('Coffee (g)')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Save recipe' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Back to home' }))
+    fireEvent.click(screen.getByRole('link', { name: 'Home' }))
     fireEvent.click(screen.getByRole('button', { name: 'Reorder' }))
     fireEvent.click(screen.getByRole('button', { name: 'Move English test up' }))
     fireEvent.click(screen.getByRole('button', { name: 'Save order' }))

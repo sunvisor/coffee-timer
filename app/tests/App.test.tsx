@@ -70,7 +70,9 @@ describe('recipe management', () => {
     expect(screen.queryByRole('button', { name: '朝の一杯を上へ' })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: '並べ替え' }))
     const orderedNames = () =>
-      screen.getAllByRole('listitem').map((item) => within(item).getByText(/の一杯$/).textContent)
+      within(screen.getByRole('list', { name: 'レシピの順序' }))
+        .getAllByRole('listitem')
+        .map((item) => within(item).getByText(/の一杯$/).textContent)
     expect(screen.getByRole<HTMLButtonElement>('button', { name: '朝の一杯を上へ' }).disabled).toBe(
       true,
     )
@@ -102,7 +104,11 @@ describe('recipe management', () => {
     fireEvent.click(screen.getByRole('button', { name: '順序を保存' }))
     expect(screen.getByRole('alert').textContent).toContain('保存できませんでした')
     expect(screen.getByRole('heading', { name: 'レシピの並べ替え' })).toBeTruthy()
-    expect(within(screen.getAllByRole('listitem')[0]).getByText('別のレシピ')).toBeTruthy()
+    expect(
+      within(
+        within(screen.getByRole('list', { name: 'レシピの順序' })).getAllByRole('listitem')[0],
+      ).getByText('別のレシピ'),
+    ).toBeTruthy()
     expect(localStorage.getItem(STORAGE_KEY)).toBe(stored)
   })
 
@@ -261,9 +267,13 @@ describe('backup import', () => {
     fireEvent.click(screen.getByRole('button', { name: '設定' }))
     for (let count = 2; count <= 3; count++) {
       await selectBackup()
-      expect(screen.getByRole<HTMLInputElement>('radio', { name: /現在のレシピに追加する/ }).checked).toBe(true)
+      expect(
+        screen.getByRole<HTMLInputElement>('radio', { name: /現在のレシピに追加する/ }).checked,
+      ).toBe(true)
       fireEvent.click(screen.getByRole('button', { name: '1 件を追加する' }))
-      expect(screen.getByRole('status').textContent).toBe(`1 件を追加しました。合計 ${count} 件になりました。`)
+      expect(screen.getByRole('status').textContent).toBe(
+        `1 件を追加しました。合計 ${count} 件になりました。`,
+      )
       const saved = parseRecipes(JSON.parse(localStorage.getItem(STORAGE_KEY)!))
       expect(saved).toHaveLength(count)
       expect(saved[0]).toEqual(sampleRecipes[0])
@@ -281,7 +291,9 @@ describe('backup import', () => {
     expect(screen.queryByRole('group')).toBeNull()
     expect(onImport).not.toHaveBeenCalled()
     await selectBackup()
-    expect(screen.getByRole<HTMLInputElement>('radio', { name: /現在のレシピに追加する/ }).checked).toBe(true)
+    expect(
+      screen.getByRole<HTMLInputElement>('radio', { name: /現在のレシピに追加する/ }).checked,
+    ).toBe(true)
   })
 
   it('keeps the preview and reports no success when storage cannot be saved', async () => {

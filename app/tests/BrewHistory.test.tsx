@@ -90,7 +90,7 @@ describe('brew history', () => {
     const { router, view } = renderApp([`/logs/${log.id}`])
     expect(screen.getByRole('heading', { name: recipe.name })).toBeTruthy()
     expect(screen.getByText(/開始：/).querySelector('time')?.dateTime).toBe(log.startedAt)
-    fireEvent.click(screen.getByRole('button', { name: '記録一覧に戻る' }))
+    fireEvent.click(screen.getByRole('link', { name: '抽出記録' }))
     expect(router.state.location.pathname).toBe('/logs')
     await act(async () => router.navigate(-1))
     expect(screen.getByRole('heading', { name: recipe.name })).toBeTruthy()

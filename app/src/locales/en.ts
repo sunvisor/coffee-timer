@@ -16,6 +16,8 @@ export const en: Record<keyof typeof ja, string> = {
   'eyebrow.complete': 'BREW COMPLETE',
   'nav.menu': 'Main menu',
   'nav.home': 'Back to home',
+  'nav.homeLabel': 'Home',
+  'nav.breadcrumbs': 'Breadcrumb',
   'nav.settings': 'Settings',
   'common.cancel': 'Cancel',
   'common.delete': 'Delete',
@@ -142,8 +144,7 @@ export const en: Record<keyof typeof ja, string> = {
   'history.title': 'Brew records',
   'history.intro': 'Review your actual brewing steps and turn them into a new recipe.',
   'history.open': 'View brew records',
-  'history.back': 'Back to records',
-  'history.settings': 'Back to settings',
+  'history.detail': 'Record details',
   'history.recipeHint':
     'Times are rounded up to whole seconds, with a minimum of 1 second. Review and save in the editor.',
   'history.saveRecipe': 'Save as recipe',

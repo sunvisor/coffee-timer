@@ -55,7 +55,7 @@ describe('screen routing', () => {
       await router.navigate('/recipes/missing')
     })
     expect(screen.getByRole('heading', { name: 'ページが見つかりません' })).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'ホームに戻る' }))
+    fireEvent.click(screen.getByRole('link', { name: 'ホーム' }))
     expect(screen.getByRole('heading', { name: /マイレシピ/ })).toBeTruthy()
   })
 

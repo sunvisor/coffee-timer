@@ -162,7 +162,7 @@ describe('PWA update notice', () => {
     expect(reload).not.toHaveBeenCalled()
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     fireEvent.click(screen.getByRole('button', { name: '抽出を中止' }))
-    fireEvent.click(screen.getByRole('button', { name: 'ホームに戻る' }))
+    fireEvent.click(screen.getByRole('link', { name: 'ホーム' }))
     fireEvent.click(screen.getByRole('button', { name: '更新する' }))
     expect(reload).toHaveBeenCalledOnce()
   })

@@ -14,6 +14,8 @@ export const ja = {
   'eyebrow.complete': 'BREW COMPLETE',
   'nav.menu': 'メインメニュー',
   'nav.home': 'ホームに戻る',
+  'nav.homeLabel': 'ホーム',
+  'nav.breadcrumbs': 'パンくずリスト',
   'nav.settings': '設定',
   'common.cancel': 'キャンセル',
   'common.delete': '削除',
@@ -141,8 +143,7 @@ export const ja = {
   'history.title': '抽出記録',
   'history.intro': '実際に淹れた手順を振り返り、新しいレシピにできます。',
   'history.open': '抽出記録を見る',
-  'history.back': '記録一覧に戻る',
-  'history.settings': '設定に戻る',
+  'history.detail': '記録の詳細',
   'history.recipeHint':
     '実測時間を秒単位で切り上げます。1秒未満は1秒とし、編集画面で確認して保存できます。',
   'history.saveRecipe': 'レシピとして保存',

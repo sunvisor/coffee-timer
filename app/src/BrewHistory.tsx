@@ -20,12 +20,10 @@ export function BrewHistory({
   id,
   onSelect,
   onRecipe,
-  onBack,
 }: {
   id?: string
   onSelect: (id: string) => void
   onRecipe: (recipe: Recipe) => void
-  onBack: () => void
 }) {
   const { t } = useI18n()
   const [{ logs, error }] = useState(loadLogs)
@@ -39,9 +37,6 @@ export function BrewHistory({
     const log = logs.find((item) => item.id === id)
     return (
       <>
-        <button className="back-button" onClick={onBack}>
-          {t('history.back')}
-        </button>
         {log ? (
           <>
             <BrewLogView log={log} />
@@ -58,9 +53,6 @@ export function BrewHistory({
   }
   return (
     <>
-      <button className="back-button" onClick={onBack}>
-        {t('history.settings')}
-      </button>
       <div className="page-intro">
         <span className="eyebrow">{t('eyebrow.history')}</span>
         <h1>{t('history.title')}</h1>

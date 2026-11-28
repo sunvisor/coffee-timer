@@ -4,6 +4,7 @@ import { translate } from './i18n'
 import { version } from '../package.json'
 import { Brew } from './Brew'
 import { BrewHistory } from './BrewHistory'
+import { Breadcrumbs } from './Breadcrumbs'
 import { closeAudio } from './audio'
 import { Markdown } from './Markdown'
 import { RecipeEditor } from './RecipeEditor'
@@ -192,11 +193,7 @@ function App() {
             )}
           </div>
         )}
-        {screen.type !== 'home' && screen.type !== 'brew' && (
-          <button className="back-button" onClick={() => setScreen({ type: 'home' })}>
-            {t('nav.home')}
-          </button>
-        )}
+        <Breadcrumbs screen={screen} recipes={recipes} />
         {error && (
           <p className="error" role="alert">
             {error}
@@ -268,7 +265,6 @@ function App() {
             id={screen.type === 'log' ? screen.id : undefined}
             onSelect={(id) => setScreen({ type: 'log', id })}
             onRecipe={(recipe) => setScreen({ type: 'edit', recipe })}
-            onBack={() => setScreen({ type: screen.type === 'log' ? 'logs' : 'settings' })}
           />
         )}
         {screen.type === 'not-found' && (

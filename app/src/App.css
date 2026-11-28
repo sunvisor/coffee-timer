@@ -368,13 +368,35 @@ main {
   margin-left: 8px;
   font: 0.75rem system-ui, sans-serif;
 }
-.back-button {
-  margin: 24px 0;
-  border: 0;
-  background: transparent;
-  padding: 0;
+.breadcrumbs {
+  margin: 16px 0 24px;
   color: var(--muted);
   font-size: 0.875rem;
+}
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.breadcrumbs li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.breadcrumbs a,
+.breadcrumbs [aria-current] {
+  display: inline-block;
+  min-height: 44px;
+  padding-block: 10px;
+}
+.breadcrumb-separator {
+  flex-shrink: 0;
 }
 .page-intro,
 .detail-intro {
