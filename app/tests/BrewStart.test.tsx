@@ -39,7 +39,7 @@ describe('pending brew starts', () => {
   it('does not start after returning home while audio is preparing', async () => {
     const { start, contexts, pending } = setup()
     start()
-    fireEvent.click(screen.getByRole('button', { name: 'ホームに戻る' }))
+    fireEvent.click(screen.getByRole('link', { name: 'ホーム' }))
     expect(contexts[0].close).toHaveBeenCalledOnce()
     await act(async () => {
       pending[0].resolve()
@@ -80,7 +80,7 @@ describe('pending brew starts', () => {
   it('does not start silently when a cancelled audio request rejects', async () => {
     const { start, contexts, pending } = setup()
     start()
-    fireEvent.click(screen.getByRole('button', { name: 'ホームに戻る' }))
+    fireEvent.click(screen.getByRole('link', { name: 'ホーム' }))
     await act(async () => {
       pending[0].reject(new DOMException('Audio denied'))
     })

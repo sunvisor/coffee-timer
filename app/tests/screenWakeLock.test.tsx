@@ -47,7 +47,7 @@ describe('screen wake lock', () => {
     fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
     await act(async () => {})
     expect(locks[0].release).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByRole('button', { name: 'ホームに戻る' }))
+    fireEvent.click(screen.getByRole('link', { name: 'ホーム' }))
     expect(locks[0].release).toHaveBeenCalledOnce()
     fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
     await act(async () => {})
