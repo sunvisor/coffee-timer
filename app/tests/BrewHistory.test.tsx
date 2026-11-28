@@ -67,7 +67,7 @@ describe('brew history', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'ホームに戻る' }))
     fireEvent.click(screen.getByRole('button', { name: '設定' }))
-    fireEvent.click(screen.getByRole('button', { name: '抽出ログを見る' }))
+    fireEvent.click(screen.getByRole('button', { name: '抽出記録を見る' }))
     fireEvent.click(screen.getByRole('button', { name: /実測テスト/ }))
     expect(screen.getByRole('heading', { name: '実測テスト' })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'レシピとして保存' }))
@@ -90,7 +90,7 @@ describe('brew history', () => {
     const { router, view } = renderApp([`/logs/${log.id}`])
     expect(screen.getByRole('heading', { name: recipe.name })).toBeTruthy()
     expect(screen.getByText(/開始：/).querySelector('time')?.dateTime).toBe(log.startedAt)
-    fireEvent.click(screen.getByRole('button', { name: 'ログ一覧に戻る' }))
+    fireEvent.click(screen.getByRole('button', { name: '記録一覧に戻る' }))
     expect(router.state.location.pathname).toBe('/logs')
     await act(async () => router.navigate(-1))
     expect(screen.getByRole('heading', { name: recipe.name })).toBeTruthy()
@@ -101,14 +101,14 @@ describe('brew history', () => {
 
   it('shows an empty list and explains missing or unreadable logs', async () => {
     const { router } = renderApp(['/logs'])
-    expect(screen.getByText('抽出ログはまだありません。')).toBeTruthy()
+    expect(screen.getByText('抽出記録はまだありません。')).toBeTruthy()
     await act(async () => router.navigate('/logs/missing'))
-    expect(screen.getByRole('heading', { name: '抽出ログが見つかりません' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: '抽出記録が見つかりません' })).toBeTruthy()
     cleanup()
     localStorage.setItem(LOG_STORAGE_KEY, 'broken')
     vi.spyOn(console, 'warn').mockImplementation(() => {})
     renderApp(['/logs'])
-    expect(screen.getByRole('alert').textContent).toContain('抽出ログを読み込めませんでした')
+    expect(screen.getByRole('alert').textContent).toContain('抽出記録を読み込めませんでした')
     expect(localStorage.getItem(LOG_STORAGE_KEY)).toBe('broken')
   })
 
@@ -124,14 +124,14 @@ describe('brew history', () => {
     expect(
       screen
         .getAllByRole('alert')
-        .some((alert) => alert.textContent?.includes('抽出ログを保存できませんでした')),
+        .some((alert) => alert.textContent?.includes('抽出記録を保存できませんでした')),
     ).toBe(true)
     expect(screen.getByRole('heading', { name: '実際の抽出手順' })).toBeTruthy()
     setItem.mockRestore()
     await act(async () =>
-      fireEvent.click(screen.getByRole('button', { name: 'ログの保存を再試行' })),
+      fireEvent.click(screen.getByRole('button', { name: '記録の保存を再試行' })),
     )
-    expect(screen.queryByRole('button', { name: 'ログの保存を再試行' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '記録の保存を再試行' })).toBeNull()
     expect(readBrewLogs()).toHaveLength(1)
   })
 

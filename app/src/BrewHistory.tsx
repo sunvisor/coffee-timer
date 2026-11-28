@@ -10,7 +10,7 @@ function loadLogs() {
     console.warn('Could not read brew logs', reason)
     return {
       logs: [],
-      error: '抽出ログを読み込めませんでした。保存データやブラウザーの保存許可を確認してください。',
+      error: '抽出記録を読み込めませんでした。保存データやブラウザーの保存許可を確認してください。',
     }
   }
 }
@@ -38,7 +38,7 @@ export function BrewHistory({
     return (
       <>
         <button className="back-button" onClick={onBack}>
-          ログ一覧に戻る
+          記録一覧に戻る
         </button>
         {log ? (
           <>
@@ -51,7 +51,7 @@ export function BrewHistory({
             </button>
           </>
         ) : (
-          <h1>抽出ログが見つかりません</h1>
+          <h1>抽出記録が見つかりません</h1>
         )}
       </>
     )
@@ -63,11 +63,11 @@ export function BrewHistory({
       </button>
       <div className="page-intro">
         <span className="eyebrow">BREW HISTORY</span>
-        <h1>抽出ログ</h1>
+        <h1>抽出記録</h1>
         <p>新しい順に最大 {MAX_LOGS} 件を保存します。容量に応じて古い記録から削除します。</p>
       </div>
       {logs.length === 0 ? (
-        <p className="panel">抽出ログはまだありません。</p>
+        <p className="panel">抽出記録はまだありません。</p>
       ) : (
         <ol className="log-list">
           {logs.map((log) => (
