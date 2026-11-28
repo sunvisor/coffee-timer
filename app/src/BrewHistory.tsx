@@ -43,14 +43,7 @@ export function BrewHistory({
     const log = logs.find((item) => item.id === id)
     return (
       <>
-        {log ? (
-          <>
-            <BrewLogView log={log} />
-            <p className="muted">{t('history.recipeHint')}</p>
-          </>
-        ) : (
-          <h1>{t('history.missing')}</h1>
-        )}
+        {log ? <BrewLogView log={log} /> : <h1>{t('history.missing')}</h1>}
         <div className="detail-footer">
           {back}
           {log && (
@@ -59,6 +52,7 @@ export function BrewHistory({
             </button>
           )}
         </div>
+        {log && <p className="muted recipe-save-hint">{t('history.recipeHint')}</p>}
       </>
     )
   }

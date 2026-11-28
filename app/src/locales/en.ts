@@ -147,7 +147,7 @@ export const en: Record<keyof typeof ja, string> = {
   'history.open': 'View brew records',
   'history.detail': 'Record details',
   'history.recipeHint':
-    'Times are rounded up to whole seconds, with a minimum of 1 second. Review and save in the editor.',
+    'When saving as a recipe, measured times are rounded up to whole seconds, with a minimum of 1 second. Review and save in the editor.',
   'history.saveRecipe': 'Save as recipe',
   'history.missing': 'Brew record not found',
   'history.limit':
