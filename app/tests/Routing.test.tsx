@@ -45,6 +45,10 @@ describe('screen routing', () => {
     })
     expect(screen.getByRole('heading', { name: /マイレシピ/ })).toBeTruthy()
     expect(screen.getByRole('banner')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
+    fireEvent.click(screen.getByRole('button', { name: '戻る' }))
+    expect(router.state.location.pathname).toBe('/')
+    expect(screen.getByRole('heading', { name: /マイレシピ/ })).toBeTruthy()
   })
 
   it('restores saved recipes from direct URLs and handles missing recipes', async () => {

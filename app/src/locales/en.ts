@@ -20,6 +20,7 @@ export const en: Record<keyof typeof ja, string> = {
   'nav.breadcrumbs': 'Breadcrumb',
   'nav.settings': 'Settings',
   'common.cancel': 'Cancel',
+  'common.back': 'Back',
   'common.delete': 'Delete',
   'common.edit': 'Edit',
   'common.steps': 'Steps: {count}',

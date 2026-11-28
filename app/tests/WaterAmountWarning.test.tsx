@@ -64,6 +64,7 @@ describe('water amount warnings', () => {
         onStart={onStart}
         onEdit={vi.fn()}
         onDelete={vi.fn()}
+        onBack={vi.fn()}
       />,
     )
     expect(screen.getByRole('status').textContent).toContain('レシピは 300 ml')
