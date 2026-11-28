@@ -2,7 +2,7 @@ import { type CSSProperties } from 'react'
 import { Markdown } from './Markdown'
 import { BrewControls } from './BrewControls'
 import { ScreenAwake } from './ScreenAwake'
-import { formatTime, totalSeconds, type Recipe } from './recipes'
+import { formatTime, type Recipe } from './recipes'
 import { useBrew } from './useBrew'
 import { BrewCompletion } from './BrewCompletion'
 
@@ -17,7 +17,7 @@ export function Brew({
   onExit: () => void
   onHome: () => void
 }) {
-  const { elapsed, paused, pause, progress, log, skip } = useBrew(recipe, audio)
+  const { elapsed, total, paused, pause, progress, log, skip } = useBrew(recipe, audio)
   const task = recipe.tasks[progress.index]
   if (log) return <BrewCompletion log={log} onExit={onExit} onHome={onHome} />
   return (
@@ -73,8 +73,7 @@ export function Brew({
         )}
         <Markdown>{task.description}</Markdown>
         <div className="brew-total">
-          全体 {formatTime(Math.min(Math.floor(elapsed), totalSeconds(recipe)))} /{' '}
-          {formatTime(totalSeconds(recipe))}
+          全体 {formatTime(Math.floor(elapsed))} / {formatTime(total)}
         </div>
       </div>
       <div className="brew-notes">
