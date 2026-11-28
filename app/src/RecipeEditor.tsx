@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { newTask, type BrewTask, type Recipe } from './recipes'
 import { WaterAmountWarning } from './WaterAmountWarning'
 import { OrderButton } from './OrderButton'
+import { useI18n } from './useI18n'
 
 type Props = { initial: Recipe; onSave: (recipe: Recipe) => void; onCancel: () => void }
 type NumberFieldProps = {
@@ -44,12 +45,13 @@ function TaskEditor({
   onMove: (direction: number) => void
   onRemove: () => void
 }) {
+  const { t } = useI18n()
   return (
     <fieldset className="task-editor">
-      <legend>STEP {String(index + 1).padStart(2, '0')}</legend>
+      <legend>{t('common.step', { number: String(index + 1).padStart(2, '0') })}</legend>
       <div className="task-toolbar">
         <label>
-          種別
+          {t('task.type')}
           <select
             value={task.type}
             onChange={(event) => {
@@ -57,8 +59,8 @@ function TaskEditor({
               onChange({ ...task, type, amount: type === 'wait' ? 0 : 50 })
             }}
           >
-            <option value="pour">抽出</option>
-            <option value="wait">待機</option>
+            <option value="pour">{t('task.pour')}</option>
+            <option value="wait">{t('task.wait')}</option>
           </select>
         </label>
         <div className="actions">
@@ -66,21 +68,21 @@ function TaskEditor({
             direction="up"
             disabled={index === 0}
             onClick={() => onMove(-1)}
-            label={`タスク${index + 1}を上へ`}
+            label={t('task.up', { number: index + 1 })}
           />
           <OrderButton
             direction="down"
             disabled={index === count - 1}
             onClick={() => onMove(1)}
-            label={`タスク${index + 1}を下へ`}
+            label={t('task.down', { number: index + 1 })}
           />
           <button type="button" disabled={count === 1} onClick={onRemove}>
-            削除
+            {t('common.delete')}
           </button>
         </div>
       </div>
       <label>
-        説明
+        {t('recipe.description')}
         <textarea
           value={task.description}
           onChange={(event) => onChange({ ...task, description: event.target.value })}
@@ -88,7 +90,7 @@ function TaskEditor({
       </label>
       <div className="field-grid">
         <NumberField
-          label="時間（秒）"
+          label={t('task.seconds')}
           value={task.seconds}
           integer
           max={86400}
@@ -96,7 +98,7 @@ function TaskEditor({
         />
         {task.type === 'pour' && (
           <NumberField
-            label="注ぐ量（g）"
+            label={t('task.amount')}
             value={task.amount}
             onChange={(amount) => onChange({ ...task, amount })}
           />
@@ -107,6 +109,7 @@ function TaskEditor({
 }
 
 export function RecipeEditor({ initial, onSave, onCancel }: Props) {
+  const { t } = useI18n()
   const [recipe, setRecipe] = useState(initial)
   const update = <K extends keyof Recipe>(key: K, value: Recipe[K]) =>
     setRecipe({ ...recipe, [key]: value })
@@ -122,54 +125,54 @@ export function RecipeEditor({ initial, onSave, onCancel }: Props) {
   return (
     <form onSubmit={submit} className="editor panel">
       <label>
-        レシピ名
+        {t('recipe.name')}
         <input
           required
           maxLength={100}
           pattern=".*\S.*"
           value={recipe.name}
-          placeholder="例：休日のハンドドリップ"
+          placeholder={t('recipe.namePlaceholder')}
           onChange={(event) => update('name', event.target.value)}
         />
       </label>
       <label>
-        説明
+        {t('recipe.description')}
         <textarea
           value={recipe.description}
           onChange={(event) => update('description', event.target.value)}
-          placeholder="味わいやレシピの特徴を記録"
+          placeholder={t('recipe.descriptionPlaceholder')}
         />
       </label>
       <div className="field-grid">
         <NumberField
-          label="コーヒー（g）"
+          label={t('recipe.coffeeField')}
           value={recipe.coffee}
           onChange={(value) => update('coffee', value)}
         />
         <NumberField
-          label="お湯（ml）"
+          label={t('recipe.waterField')}
           value={recipe.water}
           onChange={(value) => update('water', value)}
         />
         <NumberField
-          label="湯温（℃）"
+          label={t('recipe.temperatureField')}
           value={recipe.temperature}
           max={100}
           onChange={(value) => update('temperature', value)}
         />
       </div>
       <label>
-        準備
+        {t('recipe.preparation')}
         <textarea
           rows={4}
           value={recipe.preparation}
           onChange={(event) => update('preparation', event.target.value)}
         />
       </label>
-      <p className="muted">説明と準備には Markdown が使えます。改行もそのまま表示されます。</p>
+      <p className="muted">{t('recipe.markdown')}</p>
       <div className="section-heading">
-        <h2>抽出のステップ</h2>
-        <span>{recipe.tasks.length} ステップ</span>
+        <h2>{t('recipe.steps')}</h2>
+        <span>{t('common.steps', { count: recipe.tasks.length })}</span>
       </div>
       {recipe.tasks.map((task, index) => (
         <TaskEditor
@@ -197,15 +200,15 @@ export function RecipeEditor({ initial, onSave, onCancel }: Props) {
         className="add-task"
         onClick={() => update('tasks', [...recipe.tasks, newTask()])}
       >
-        ＋ ステップを追加
+        {t('recipe.addStep')}
       </button>
       <WaterAmountWarning recipe={recipe} />
       <div className="form-footer actions">
         <button type="button" onClick={onCancel}>
-          キャンセル
+          {t('common.cancel')}
         </button>
         <button className="primary" type="submit">
-          レシピを保存
+          {t('recipe.save')}
         </button>
       </div>
     </form>

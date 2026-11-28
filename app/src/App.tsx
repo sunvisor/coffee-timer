@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useI18n } from './useI18n'
+import { translate } from './i18n'
 import { version } from '../package.json'
 import { Brew } from './Brew'
 import { BrewHistory } from './BrewHistory'
@@ -27,27 +29,27 @@ function Home({
   onAdd: () => void
   onOrder: () => void
 }) {
+  const { t } = useI18n()
   return (
     <>
       <section className="home-intro">
         <div className="home-intro-copy">
-          <span className="eyebrow">A LITTLE RITUAL, A BETTER DAY.</span>
-          <h1>一杯を、ていねいに。</h1>
+          <span className="eyebrow">{t('eyebrow.home')}</span>
+          <h1>{t('home.title')}</h1>
           <p>
-            豆を量って、お湯を注いで、ひと呼吸。
+            {t('home.intro')}
             <br />
-            お気に入りのレシピで、今日のコーヒーを淹れましょう。
+            {t('home.invitation')}
           </p>
         </div>
         <div className="cup-art" aria-hidden="true">
-          <svg
-            className="steam"
-            viewBox="0 0 90 100"
-            fill="currentColor"
-          >
+          <svg className="steam" viewBox="0 0 90 100" fill="currentColor">
             <path d="M34 99C42 77 27 57 17 43C6 28 5 20 10 13C-1 23 4 38 13 51C25 69 36 81 34 99Z" />
             <path d="M43 84C53 73 55 59 51 45C47 31 50 22 61 20C73 18 81 26 77 35C74 42 64 42 62 35C60 31 62 28 66 27C58 26 55 34 59 40C64 49 78 47 83 37C90 23 78 10 64 12C43 13 39 29 44 47C49 64 48 73 43 84Z" />
-            <path d="M32 32C23 20 25 14 30 7C33 2 33-1 32-4C43 4 39 12 35 18C32 23 30 26 32 32Z" transform="translate(0 4)" />
+            <path
+              d="M32 32C23 20 25 14 30 7C33 2 33-1 32-4C43 4 39 12 35 18C32 23 30 26 32 32Z"
+              transform="translate(0 4)"
+            />
           </svg>
           <div className="cup" />
           <div className="saucer" />
@@ -55,11 +57,11 @@ function Home({
       </section>
       <div className="section-heading recipes-heading">
         <h2>
-          マイレシピ <span className="count-badge">{recipes.length}</span>
+          {t('home.recipes')} <span className="count-badge">{recipes.length}</span>
         </h2>
         {recipes.length > 1 && (
           <button className="recipe-sort-link" onClick={onOrder}>
-            並べ替え
+            {t('home.order')}
           </button>
         )}
       </div>
@@ -67,8 +69,10 @@ function Home({
         {recipes.map((recipe, index) => (
           <article className="recipe-card" key={recipe.id}>
             <div className="card-top">
-              <span className="eyebrow">RECIPE {String(index + 1).padStart(2, '0')}</span>
-              <span className="pill">{recipe.tasks.length} ステップ</span>
+              <span className="eyebrow">
+                {t('common.recipeNumber', { number: String(index + 1).padStart(2, '0') })}
+              </span>
+              <span className="pill">{t('common.steps', { count: recipe.tasks.length })}</span>
             </div>
             <h3>
               <button className="recipe-title" onClick={() => onSelect(recipe)}>
@@ -78,26 +82,34 @@ function Home({
             <Markdown>{recipe.description}</Markdown>
             <RecipeStats recipe={recipe} />
             <button className="card-link" onClick={() => onSelect(recipe)}>
-              このレシピで淹れる
+              {t('home.brew')}
             </button>
           </article>
         ))}
         <button className="new-recipe-card" onClick={onAdd}>
           <span className="add-symbol">＋</span>
-          <strong>新しいレシピを作る</strong>
-          <span>自分だけのおいしさを記録しましょう</span>
+          <strong>{t('home.new')}</strong>
+          <span>{t('home.newHint')}</span>
         </button>
       </div>
-      <p className="home-note">ひとつずつのステップを、タイマーと音でお手伝いします。</p>
+      <p className="home-note">{t('home.note')}</p>
     </>
   )
 }
 
 function App() {
+  const { t, language } = useI18n()
+  useEffect(() => {
+    document.documentElement.lang = language
+    document.title = translate('app.title', {}, language)
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute('content', translate('app.description', {}, language))
+  }, [language])
   const { recipes, error, save } = useRecipes()
   const { screen, setScreen: navigateScreen } = useScreen(recipes)
   const appUpdate = usePwaUpdate(screen.type === 'home')
-  const [audioError, setAudioError] = useState('')
+  const [audioError, setAudioError] = useState(false)
   const { start, cancel } = useBrewStart((recipe, audio, error) => {
     setAudioError(error)
     navigateScreen({ type: 'brew', recipe, audio })
@@ -123,7 +135,7 @@ function App() {
   }
   function remove(recipe: Recipe) {
     if (
-      window.confirm(`「${recipe.name}」を削除しますか？`) &&
+      window.confirm(t('recipe.deleteConfirm', { name: recipe.name })) &&
       save(recipes.filter((item) => item.id !== recipe.id))
     )
       setScreen({ type: 'home' }, { replace: true })
@@ -137,15 +149,15 @@ function App() {
               ☕
             </span>
             <span>
-              coffee timer<small>いつもの一杯を、もっとおいしく。</small>
+              coffee timer<small>{t('app.tagline')}</small>
             </span>
           </button>
-          <nav aria-label="メインメニュー">
+          <nav aria-label={t('nav.menu')}>
             <button
               className="icon-button"
               onClick={() => setScreen({ type: 'settings' })}
-              aria-label="設定"
-              title="設定"
+              aria-label={t('nav.settings')}
+              title={t('nav.settings')}
             >
               <svg
                 viewBox="0 0 24 24"
@@ -156,7 +168,10 @@ function App() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="m9 3 .5-2h5l.5 2 2 1 2-.5 2.5 4.3L20 9.5v2l1.5 1.7L19 17.5l-2-.5-2 1-.5 2h-5L9 18l-2-1-2 .5-2.5-4.3L4 11.5v-2L2.5 7.8 5 3.5 7 4Z" transform="translate(0 1.5)" />
+                <path
+                  d="m9 3 .5-2h5l.5 2 2 1 2-.5 2.5 4.3L20 9.5v2l1.5 1.7L19 17.5l-2-.5-2 1-.5 2h-5L9 18l-2-1-2 .5-2.5-4.3L4 11.5v-2L2.5 7.8 5 3.5 7 4Z"
+                  transform="translate(0 1.5)"
+                />
                 <circle cx="12" cy="12" r="3" />
               </svg>
             </button>
@@ -166,16 +181,20 @@ function App() {
       <main>
         {screen.type === 'home' && appUpdate.ready && (
           <div className="update-notice">
-            <p role="status">新しいバージョンがあります。</p>
+            <p role="status">{t('update.available')}</p>
             <button disabled={appUpdate.applying} onClick={() => void appUpdate.apply()}>
-              {appUpdate.applying ? '更新中…' : '更新する'}
+              {t(appUpdate.applying ? 'update.applying' : 'update.apply')}
             </button>
-            {appUpdate.error && <p role="alert" className="error">{appUpdate.error}</p>}
+            {appUpdate.error && (
+              <p role="alert" className="error">
+                {appUpdate.error}
+              </p>
+            )}
           </div>
         )}
         {screen.type !== 'home' && screen.type !== 'brew' && (
           <button className="back-button" onClick={() => setScreen({ type: 'home' })}>
-            ホームに戻る
+            {t('nav.home')}
           </button>
         )}
         {error && (
@@ -185,7 +204,7 @@ function App() {
         )}
         {audioError && screen.type === 'brew' && (
           <p className="error" role="alert">
-            {audioError}
+            {t('audio.failed')}
           </p>
         )}
         {screen.type === 'home' && (
@@ -214,13 +233,13 @@ function App() {
         {screen.type === 'edit' && (
           <>
             <div className="page-intro">
-              <span className="eyebrow">MAKE IT YOURS</span>
+              <span className="eyebrow">{t('eyebrow.editor')}</span>
               <h1>
                 {recipes.some((item) => item.id === screen.recipe.id)
-                  ? 'レシピを編集'
-                  : '新しいレシピ'}
+                  ? t('recipe.edit')
+                  : t('recipe.new')}
               </h1>
-              <p>おいしかった一杯を、また淹れられるように。</p>
+              <p>{t('recipe.editorIntro')}</p>
             </div>
             <RecipeEditor
               key={screen.recipe.id}
@@ -233,14 +252,14 @@ function App() {
         {screen.type === 'settings' && (
           <>
             <div className="page-intro">
-              <span className="eyebrow">SETTINGS</span>
-              <h1>設定</h1>
+              <span className="eyebrow">{t('eyebrow.settings')}</span>
+              <h1>{t('nav.settings')}</h1>
             </div>
             <Settings recipes={recipes} onImport={save} />
             <section className="panel">
-              <h2>抽出の記録</h2>
-              <p>実際に淹れた手順を振り返り、新しいレシピにできます。</p>
-              <button onClick={() => setScreen({ type: 'logs' })}>抽出記録を見る</button>
+              <h2>{t('history.title')}</h2>
+              <p>{t('history.intro')}</p>
+              <button onClick={() => setScreen({ type: 'logs' })}>{t('history.open')}</button>
             </section>
           </>
         )}
@@ -254,8 +273,8 @@ function App() {
         )}
         {screen.type === 'not-found' && (
           <section className="panel">
-            <h1>ページが見つかりません</h1>
-            <p>レシピが削除されたか、URL が正しくありません。ホームから選び直してください。</p>
+            <h1>{t('missing.title')}</h1>
+            <p>{t('missing.hint')}</p>
           </section>
         )}
         {screen.type === 'brew' && (
@@ -271,7 +290,7 @@ function App() {
         <span>
           coffee timer <small>v{version}</small>
         </span>
-        <span>ゆっくり淹れる、豊かな時間。</span>
+        <span>{t('app.footer')}</span>
       </footer>
     </div>
   )

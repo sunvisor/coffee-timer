@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { registerSW } from 'virtual:pwa-register'
+import { useI18n } from './useI18n'
 
 function watchForUpdates(registration: ServiceWorkerRegistration | undefined) {
   async function check() {
@@ -24,10 +25,11 @@ function watchForUpdates(registration: ServiceWorkerRegistration | undefined) {
 }
 
 export function usePwaUpdate(safeToReload: boolean) {
+  const { t } = useI18n()
   const [ready, setReady] = useState(false)
   const [activated, setActivated] = useState(false)
   const [applying, setApplying] = useState(false)
-  const [error, setError] = useState('')
+  const [failed, setFailed] = useState(false)
   const update = useRef<ReturnType<typeof registerSW> | null>(null)
 
   useEffect(() => {
@@ -47,7 +49,8 @@ export function usePwaUpdate(safeToReload: boolean) {
         if (!active) return
         stopChecking = watchForUpdates(value)
       },
-      onRegisterError: (reason: unknown) => console.warn('Could not register the service worker.', reason),
+      onRegisterError: (reason: unknown) =>
+        console.warn('Could not register the service worker.', reason),
     })
     return () => {
       active = false
@@ -62,15 +65,15 @@ export function usePwaUpdate(safeToReload: boolean) {
 
   async function apply() {
     if (!ready || !safeToReload || applying || !update.current) return
-    setError('')
+    setFailed(false)
     setApplying(true)
     try {
       if (!activated) await update.current()
     } catch (reason) {
       console.warn('Could not apply the app update.', reason)
-      setError('更新できませんでした。接続を確認して、もう一度お試しください。')
+      setFailed(true)
       setApplying(false)
     }
   }
-  return { ready, applying, error, apply }
+  return { ready, applying, error: failed ? t('update.failed') : '', apply }
 }

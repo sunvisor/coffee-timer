@@ -1,26 +1,32 @@
 import { useState } from 'react'
-import { parseRecipes, sampleRecipes, STORAGE_KEY, type Recipe } from './recipes'
+import { getSampleRecipes, parseRecipes, STORAGE_KEY, type Recipe } from './recipes'
+import { type MessageKey } from './i18n'
+import { useI18n } from './useI18n'
 
-function loadRecipes() {
+function loadRecipes(): {
+  recipes: Recipe[]
+  snapshot: string | null | undefined
+  error: MessageKey | null
+} {
   let snapshot: string | null | undefined
   try {
     snapshot = localStorage.getItem(STORAGE_KEY)
     return {
-      recipes: snapshot === null ? sampleRecipes : parseRecipes(JSON.parse(snapshot)),
+      recipes: snapshot === null ? getSampleRecipes() : parseRecipes(JSON.parse(snapshot)),
       snapshot,
-      error: '',
+      error: null,
     }
   } catch {
     return {
       recipes: [] as Recipe[],
       snapshot,
-      error:
-        '保存データを読み込めませんでした。既存データは変更していません。設定からバックアップを読み込んでください。',
+      error: 'storage.readFailed',
     }
   }
 }
 
 export function useRecipes() {
+  const { t } = useI18n()
   const [state, setState] = useState(loadRecipes)
   function save(recipes: Recipe[]) {
     try {
@@ -28,22 +34,23 @@ export function useRecipes() {
       if (state.snapshot === undefined || current !== state.snapshot) {
         setState((previous) => ({
           ...previous,
-          error:
-            '別のタブでレシピが変更されたか、保存データを確認できません。入力内容を控え、このページを再読み込みしてから保存し直してください。',
+          error: 'storage.conflict',
         }))
         return false
       }
       const snapshot = JSON.stringify(parseRecipes(recipes))
       localStorage.setItem(STORAGE_KEY, snapshot)
-      setState({ recipes, snapshot, error: '' })
+      setState({ recipes, snapshot, error: null })
       return true
     } catch {
       setState((previous) => ({
         ...previous,
-        error: '保存できませんでした。入力内容、ブラウザーの保存許可、空き容量を確認してください。',
+        error: 'storage.saveFailed',
       }))
       return false
     }
   }
-  return { recipes: state.recipes, error: state.error, save }
+  const recipes =
+    state.snapshot === null && state.error === null ? getSampleRecipes() : state.recipes
+  return { recipes, error: state.error ? t(state.error) : '', save }
 }

@@ -1,4 +1,6 @@
 import { createId } from './createId'
+import { translate, TranslationError } from './i18n'
+import { ja } from './locales/ja'
 
 export type BrewTask = {
   id: string
@@ -94,9 +96,7 @@ export function parseRecipes(value: unknown): Recipe[] {
     !value.every(isRecipe) ||
     new Set(value.map((recipe) => recipe.id)).size !== value.length
   ) {
-    throw new Error(
-      'レシピの形式が正しくありません。名前、数値、タスク、ID の重複を確認してください。',
-    )
+    throw new TranslationError('recipe.invalid')
   }
   return value
 }
@@ -125,50 +125,71 @@ export function getBrewProgress(tasks: BrewTask[], elapsed: number) {
 export const sampleRecipes: Recipe[] = [
   {
     id: 'house-blend',
-    name: 'いつものハンドドリップ (Sample)',
-    description:
-      'すっきりとした甘さと、やさしい余韻。\n毎日の一杯にちょうどいい、基本のレシピです。',
+    name: ja['sample.name'],
+    description: ja['sample.description'],
     coffee: 15,
     water: 250,
     temperature: 92,
-    preparation:
-      '1. フィルターをセットし、お湯でリンスします。\n2. **中細挽きのコーヒー 15g** を入れ、表面を平らにします。\n3. サーバーをスケールにのせ、表示を 0 にします。',
+    preparation: ja['sample.preparation'],
     tasks: [
       {
         id: 'bloom',
         type: 'pour',
-        description: '粉全体にお湯を行き渡らせます。中心から小さく円を描くように。',
+        description: ja['sample.bloom'],
         seconds: 10,
         amount: 30,
       },
       {
         id: 'bloom-wait',
         type: 'wait',
-        description: 'コーヒーがふくらむのを、ゆっくり待ちましょう。',
+        description: ja['sample.bloomWait'],
         seconds: 30,
         amount: 0,
       },
       {
         id: 'first-pour',
         type: 'pour',
-        description: '中心から外側へ、細くゆっくり注ぎます。',
+        description: ja['sample.firstPour'],
         seconds: 40,
         amount: 120,
       },
       {
         id: 'last-pour',
         type: 'pour',
-        description: 'やさしく注いで、合計 250g に仕上げます。',
+        description: ja['sample.lastPour'],
         seconds: 30,
         amount: 100,
       },
       {
         id: 'drawdown',
         type: 'wait',
-        description: 'お湯が落ちきったら、ドリッパーを外しましょう。',
+        description: ja['sample.drawdown'],
         seconds: 40,
         amount: 0,
       },
     ],
   },
 ]
+
+export function getSampleRecipes(): Recipe[] {
+  const recipe = sampleRecipes[0]
+  const descriptions = [
+    'sample.bloom',
+    'sample.bloomWait',
+    'sample.firstPour',
+    'sample.lastPour',
+    'sample.drawdown',
+  ] as const
+  return [
+    {
+      ...recipe,
+      name: translate('sample.name'),
+      description: translate('sample.description'),
+      preparation: translate('sample.preparation'),
+      tasks: recipe.tasks.map((task, index) => ({
+        ...task,
+        description: translate(descriptions[index]),
+      })),
+    },
+  ]
+}

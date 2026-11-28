@@ -1,12 +1,14 @@
 import { Markdown } from './Markdown'
 import { RecipeStats } from './RecipeView'
 import { durationText, logDate, logDuration, stepDuration, type BrewLog } from './brewLogs'
+import { useI18n } from './useI18n'
 
 export function BrewLogSteps({ log }: { log: BrewLog }) {
+  const { t } = useI18n()
   return (
     <div className="log-steps">
-      <h2>実際の抽出手順</h2>
-      <p>抽出時間：{durationText(logDuration(log))}（一時停止を含む）</p>
+      <h2>{t('history.steps')}</h2>
+      <p>{t('history.duration', { time: durationText(logDuration(log)) })}</p>
       <ol className="steps">
         {log.steps.map((step, index) => {
           const task = log.recipe.tasks[index]
@@ -14,37 +16,46 @@ export function BrewLogSteps({ log }: { log: BrewLog }) {
             <li key={step.taskId}>
               <span className={`step-number ${task.type}`}>{index + 1}</span>
               <div className="step-body">
-                <strong>{task.type === 'pour' ? 'お湯を注ぐ' : 'ゆっくり待つ'}</strong>
+                <strong>{t(task.type === 'pour' ? 'common.pour' : 'common.wait')}</strong>
                 <Markdown>{task.description}</Markdown>
                 <p>
-                  実際 {durationText(stepDuration(step))} / 予定 {durationText(task.seconds * 1000)}
+                  {t('history.actual', {
+                    actual: durationText(stepDuration(step)),
+                    planned: durationText(task.seconds * 1000),
+                  })}
                 </p>
                 <small>
-                  実行 {durationText(step.activeMs)} · 一時停止 {durationText(step.pausedMs)}
-                  {step.skipped && ' · スキップで終了'}
-                  {task.type === 'pour' && ` · 注ぐ量 ${task.amount} g`}
+                  {t('history.breakdown', {
+                    active: durationText(step.activeMs),
+                    paused: durationText(step.pausedMs),
+                  })}
+                  {step.skipped && t('history.skipped')}
+                  {task.type === 'pour' && t('history.amount', { amount: task.amount })}
                 </small>
               </div>
             </li>
           )
         })}
       </ol>
-      <p className="muted">注湯量はレシピの指定値です。実際に注いだ量は計測していません。</p>
+      <p className="muted">{t('history.amountHint')}</p>
     </div>
   )
 }
 
 export function BrewLogView({ log }: { log: BrewLog }) {
+  const { t } = useI18n()
   return (
     <>
       <div className="page-intro">
-        <span className="eyebrow">BREW LOG</span>
+        <span className="eyebrow">{t('eyebrow.record')}</span>
         <h1>{log.recipe.name}</h1>
         <p>
-          開始：<time dateTime={log.startedAt}>{logDate(log.startedAt)}</time>
+          {t('history.started')}
+          <time dateTime={log.startedAt}>{logDate(log.startedAt)}</time>
         </p>
         <p>
-          完了：<time dateTime={log.finishedAt}>{logDate(log.finishedAt)}</time>
+          {t('history.finished')}
+          <time dateTime={log.finishedAt}>{logDate(log.finishedAt)}</time>
         </p>
         <Markdown>{log.recipe.description}</Markdown>
       </div>

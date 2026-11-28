@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useI18n } from './useI18n'
 
 export type ImportMode = 'add' | 'replace'
 
@@ -11,13 +12,14 @@ type Props = {
 }
 
 export function RecipeImport({ filename, count, currentCount, onConfirm, onCancel }: Props) {
+  const { t } = useI18n()
   const [mode, setMode] = useState<ImportMode>('add')
   return (
     <div className="recipe-import">
       <p className="import-filename">{filename}</p>
-      <p>{count} 件のレシピを読み込みます。</p>
+      <p>{t('import.count', { count })}</p>
       <fieldset className="import-options">
-        <legend>読み込み方法</legend>
+        <legend>{t('import.mode')}</legend>
         <label>
           <input
             type="radio"
@@ -26,8 +28,8 @@ export function RecipeImport({ filename, count, currentCount, onConfirm, onCance
             onChange={() => setMode('add')}
           />
           <span>
-            現在のレシピに追加する
-            <small>今あるレシピを残し、一覧の末尾に追加します。</small>
+            {t('import.add')}
+            <small>{t('import.addHint')}</small>
           </span>
         </label>
         <label>
@@ -38,16 +40,16 @@ export function RecipeImport({ filename, count, currentCount, onConfirm, onCance
             onChange={() => setMode('replace')}
           />
           <span>
-            現在のレシピをすべて置き換える
-            <small>今ある {currentCount} 件を削除し、ファイルの {count} 件に置き換えます。</small>
+            {t('import.replace')}
+            <small>{t('import.replaceHint', { current: currentCount, count })}</small>
           </span>
         </label>
       </fieldset>
-      {mode === 'add' && <p className="muted">同じレシピを再度読み込むと重複して追加されます。</p>}
+      {mode === 'add' && <p className="muted">{t('import.duplicateHint')}</p>}
       <div className="import-actions">
-        <button onClick={onCancel}>キャンセル</button>
+        <button onClick={onCancel}>{t('common.cancel')}</button>
         <button className="primary" onClick={() => onConfirm(mode)}>
-          {count} 件{mode === 'add' ? 'を追加する' : 'に置き換える'}
+          {t(mode === 'add' ? 'import.addButton' : 'import.replaceButton', { count })}
         </button>
       </div>
     </div>
