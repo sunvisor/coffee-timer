@@ -259,6 +259,9 @@ function App() {
               <p>{t('history.intro')}</p>
               <button onClick={() => setScreen({ type: 'logs' })}>{t('history.open')}</button>
             </section>
+            <div className="actions">
+              <button onClick={() => setScreen({ type: 'home' })}>{t('common.back')}</button>
+            </div>
           </>
         )}
         {(screen.type === 'logs' || screen.type === 'log') && (
