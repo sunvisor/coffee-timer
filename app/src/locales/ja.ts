@@ -146,7 +146,7 @@ export const ja = {
   'history.open': '抽出記録を見る',
   'history.detail': '記録の詳細',
   'history.recipeHint':
-    '実測時間を秒単位で切り上げます。1秒未満は1秒とし、編集画面で確認して保存できます。',
+    'レシピを保存する場合は、実測時間を秒単位で切り上げます。1秒未満は1秒とし、編集画面で確認して保存できます。',
   'history.saveRecipe': 'レシピとして保存',
   'history.missing': '抽出記録が見つかりません',
   'history.limit': '新しい順に最大 {count} 件を保存します。容量に応じて古い記録から削除します。',

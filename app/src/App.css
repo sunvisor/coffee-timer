@@ -475,6 +475,9 @@ main {
 .detail-footer {
   justify-content: space-between;
 }
+.recipe-save-hint {
+  margin-top: 12px;
+}
 .detail-start {
   min-width: 220px;
   margin-top: 24px;
