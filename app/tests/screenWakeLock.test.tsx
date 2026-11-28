@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import App from '../src/App'
 import { Brew } from '../src/Brew'
-import { ScreenAwakeNotice } from '../src/ScreenAwakeNotice'
+import { ScreenAwake } from '../src/ScreenAwake'
 import { keepScreenAwake } from '../src/screenWakeLock'
 import { sampleRecipes } from '../src/recipes'
 
@@ -15,7 +15,6 @@ class FakeLock extends EventTarget {
   })
 }
 
-const activeMessage = 'この画面を表示している間は、画面が自動でオフにならないようにしています。'
 const routers: ReturnType<typeof createMemoryRouter>[] = []
 function renderApp() {
   const router = createMemoryRouter([{ path: '*', Component: App }])
@@ -46,12 +45,12 @@ describe('screen wake lock', () => {
     renderApp()
     expect(request).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
-    await screen.findByText(activeMessage)
+    await act(async () => {})
     expect(locks[0].release).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'ホームに戻る' }))
     expect(locks[0].release).toHaveBeenCalledOnce()
     fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
-    await screen.findByText(activeMessage)
+    await act(async () => {})
     fireEvent.click(screen.getByRole('button', { name: '編集' }))
     expect(locks[1].release).toHaveBeenCalledOnce()
     expect(request).toHaveBeenCalledTimes(2)
@@ -68,9 +67,9 @@ describe('screen wake lock', () => {
     vi.stubGlobal('AudioContext', undefined)
     renderApp()
     fireEvent.click(screen.getByRole('button', { name: sampleRecipes[0].name }))
-    await screen.findByText(activeMessage)
+    await act(async () => {})
     await act(async () => fireEvent.click(screen.getByRole('button', { name: '抽出開始' })))
-    await screen.findByText(activeMessage)
+    expect(screen.getByRole('timer')).toBeTruthy()
     expect(locks[0].release).toHaveBeenCalledOnce()
     expect(locks[1].release).not.toHaveBeenCalled()
     for (const _task of sampleRecipes[0].tasks) {
@@ -78,7 +77,7 @@ describe('screen wake lock', () => {
     }
     expect(locks[1].release).toHaveBeenCalledOnce()
     fireEvent.click(screen.getByRole('button', { name: 'レシピに戻る' }))
-    await screen.findByText(activeMessage)
+    await act(async () => {})
     expect(locks[2].release).not.toHaveBeenCalled()
     expect(request).toHaveBeenCalledTimes(3)
   })
@@ -87,9 +86,8 @@ describe('screen wake lock', () => {
     const lock = new FakeLock()
     const request = vi.fn(async () => lock)
     vi.stubGlobal('navigator', { wakeLock: { request } })
-    const onStatus = vi.fn()
-    const stop = keepScreenAwake(onStatus)
-    await waitFor(() => expect(onStatus).toHaveBeenLastCalledWith('active'))
+    const stop = keepScreenAwake()
+    await Promise.resolve()
     expect(request).toHaveBeenCalledWith('screen')
     stop()
     expect(lock.release).toHaveBeenCalledOnce()
@@ -100,19 +98,17 @@ describe('screen wake lock', () => {
     const second = new FakeLock()
     const request = vi.fn().mockResolvedValueOnce(first).mockResolvedValueOnce(second)
     vi.stubGlobal('navigator', { wakeLock: { request } })
-    const onStatus = vi.fn()
-    const stop = keepScreenAwake(onStatus)
-    await waitFor(() => expect(onStatus).toHaveBeenLastCalledWith('active'))
+    const stop = keepScreenAwake()
+    await Promise.resolve()
     vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden')
     await first.release()
     document.dispatchEvent(new Event('visibilitychange'))
     expect(request).toHaveBeenCalledTimes(1)
-    expect(onStatus).toHaveBeenLastCalledWith('released')
     vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
     document.dispatchEvent(new Event('visibilitychange'))
     document.dispatchEvent(new Event('visibilitychange'))
     await waitFor(() => expect(request).toHaveBeenCalledTimes(2))
-    await waitFor(() => expect(onStatus).toHaveBeenLastCalledWith('active'))
+    await Promise.resolve()
     stop()
     expect(second.release).toHaveBeenCalledOnce()
     document.dispatchEvent(new Event('visibilitychange'))
@@ -130,28 +126,43 @@ describe('screen wake lock', () => {
         }),
     )
     vi.stubGlobal('navigator', { wakeLock: { request } })
-    const onStatus = vi.fn()
-    const stop = keepScreenAwake(onStatus)
+    const stop = keepScreenAwake()
     stop()
     const lock = new FakeLock()
     finish(lock)
     await waitFor(() => expect(lock.release).toHaveBeenCalledOnce())
-    expect(onStatus).not.toHaveBeenCalledWith('active')
   })
 
-  it('shows an explanation when the API is unavailable', () => {
+  it('renders no notice when the API is unavailable', () => {
     vi.stubGlobal('navigator', {})
-    render(<ScreenAwakeNotice />)
-    expect(screen.getByText(/この環境では画面オフを防止できません/)).toBeTruthy()
+    const { container } = render(<ScreenAwake />)
+    expect(container.childNodes).toHaveLength(0)
   })
 
-  it('shows an explanation when the device denies the request', async () => {
+  it('logs a denied request without rendering a notice', async () => {
     const error = new DOMException('Power saving mode', 'NotAllowedError')
     vi.stubGlobal('navigator', { wakeLock: { request: vi.fn().mockRejectedValue(error) } })
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    render(<ScreenAwakeNotice />)
-    expect(await screen.findByText(/画面オフを防止できませんでした/)).toBeTruthy()
-    expect(warn).toHaveBeenCalledWith('Could not acquire screen wake lock', error)
+    const { container } = render(<ScreenAwake />)
+    await waitFor(() =>
+      expect(warn).toHaveBeenCalledWith('Could not acquire screen wake lock', error),
+    )
+    expect(container.childNodes).toHaveLength(0)
+  })
+
+  it('renders no notice while requesting or holding the lock', async () => {
+    const lock = new FakeLock()
+    let finish!: (lock: FakeLock) => void
+    const request = vi.fn(() => new Promise<FakeLock>((resolve) => {
+      finish = resolve
+    }))
+    vi.stubGlobal('navigator', { wakeLock: { request } })
+    const { container, unmount } = render(<ScreenAwake />)
+    expect(container.childNodes).toHaveLength(0)
+    await act(async () => finish(lock))
+    expect(container.childNodes).toHaveLength(0)
+    unmount()
+    expect(lock.release).toHaveBeenCalledOnce()
   })
 
   it('holds the lock while paused and releases it on completion', async () => {
@@ -159,7 +170,7 @@ describe('screen wake lock', () => {
     const request = vi.fn(async () => lock)
     vi.stubGlobal('navigator', { wakeLock: { request } })
     render(<Brew recipe={sampleRecipes[0]} audio={null} onExit={vi.fn()} onHome={vi.fn()} />)
-    await screen.findByText(activeMessage)
+    await act(async () => {})
     fireEvent.click(screen.getByRole('button', { name: '一時停止' }))
     expect(lock.release).not.toHaveBeenCalled()
     for (const _task of sampleRecipes[0].tasks) {
@@ -176,7 +187,7 @@ describe('screen wake lock', () => {
     const view = render(
       <Brew recipe={sampleRecipes[0]} audio={null} onExit={vi.fn()} onHome={vi.fn()} />,
     )
-    await screen.findByText(activeMessage)
+    await act(async () => {})
     act(() => view.unmount())
     expect(lock.release).toHaveBeenCalledOnce()
   })

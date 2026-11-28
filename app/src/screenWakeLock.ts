@@ -1,13 +1,10 @@
-export type ScreenWakeLockStatus = 'requesting' | 'active' | 'unsupported' | 'released' | 'failed'
-
 function release(lock: WakeLockSentinel | null) {
   if (!lock || lock.released) return
   void lock.release().catch((error) => console.warn('Could not release screen wake lock', error))
 }
 
-export function keepScreenAwake(onStatus: (status: ScreenWakeLockStatus) => void) {
+export function keepScreenAwake() {
   if (typeof navigator.wakeLock?.request !== 'function') {
-    onStatus('unsupported')
     return () => {}
   }
   let stopped = false
@@ -21,18 +18,15 @@ export function keepScreenAwake(onStatus: (status: ScreenWakeLockStatus) => void
       () => {
         if (lock !== next) return
         lock = null
-        if (!stopped) onStatus('released')
       },
       { once: true },
     )
-    onStatus(next.released ? 'released' : 'active')
   }
 
   async function acquire() {
     if (stopped || pending || (lock && !lock.released) || document.visibilityState !== 'visible')
       return
     pending = true
-    onStatus('requesting')
     try {
       const next = await navigator.wakeLock.request('screen')
       if (stopped || document.visibilityState !== 'visible') release(next)
@@ -40,7 +34,6 @@ export function keepScreenAwake(onStatus: (status: ScreenWakeLockStatus) => void
     } catch (error) {
       if (!stopped) {
         console.warn('Could not acquire screen wake lock', error)
-        onStatus('failed')
       }
     } finally {
       pending = false
