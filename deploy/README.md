@@ -51,6 +51,9 @@ The script stops on errors. Wrangler prints the public URL on success.
 The default destination is `workers.dev`; follow Wrangler's prompts if first-time subdomain setup
 is required.
 
+The same deployment also serves the promotional pages at `/about/` (Japanese) and `/about/en/`
+(English). No separate Worker, DNS entry, or subdomain is needed.
+
 To validate the build and deployment configuration without publishing:
 
 ```sh

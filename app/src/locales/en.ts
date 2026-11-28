@@ -19,6 +19,7 @@ export const en: Record<keyof typeof ja, string> = {
   'nav.homeLabel': 'Home',
   'nav.breadcrumbs': 'Breadcrumb',
   'nav.settings': 'Settings',
+  'nav.about': 'About this app',
   'common.cancel': 'Cancel',
   'common.back': 'Back',
   'common.delete': 'Delete',

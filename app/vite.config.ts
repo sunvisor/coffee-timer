@@ -6,6 +6,20 @@ import { VitePWA } from 'vite-plugin-pwa'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    {
+      name: 'about-directory-index',
+      configureServer(server) {
+        // Vite's public-file middleware matches files rather than directory indexes.
+        server.middlewares.use((request, _response, next) => {
+          request.url = request.url?.replace(
+            /^\/about(?:\/(en))?\/?(?=\?|$)/,
+            (_match, language: string | undefined) =>
+              `/about/${language ? `${language}/` : ''}index.html`,
+          )
+          next()
+        })
+      },
+    },
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     VitePWA({
@@ -33,6 +47,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html}'],
         skipWaiting: false,
         clientsClaim: true,
+        navigateFallbackDenylist: [/^\/about(?:\/|$)/],
       },
     }),
   ],

@@ -17,6 +17,7 @@ export const ja = {
   'nav.homeLabel': 'ホーム',
   'nav.breadcrumbs': 'パンくずリスト',
   'nav.settings': '設定',
+  'nav.about': 'このアプリについて',
   'common.cancel': 'キャンセル',
   'common.back': '戻る',
   'common.delete': '削除',
