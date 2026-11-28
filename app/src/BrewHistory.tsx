@@ -20,18 +20,24 @@ export function BrewHistory({
   id,
   onSelect,
   onRecipe,
+  onBack,
 }: {
   id?: string
   onSelect: (id: string) => void
   onRecipe: (recipe: Recipe) => void
+  onBack: () => void
 }) {
   const { t } = useI18n()
   const [{ logs, error }] = useState(loadLogs)
+  const back = <button onClick={onBack}>{t('common.back')}</button>
   if (error)
     return (
-      <p className="error" role="alert">
-        {t('history.readFailed')}
-      </p>
+      <>
+        <p className="error" role="alert">
+          {t('history.readFailed')}
+        </p>
+        <div className="actions">{back}</div>
+      </>
     )
   if (id) {
     const log = logs.find((item) => item.id === id)
@@ -41,13 +47,18 @@ export function BrewHistory({
           <>
             <BrewLogView log={log} />
             <p className="muted">{t('history.recipeHint')}</p>
-            <button className="primary" onClick={() => onRecipe(recipeFromLog(log))}>
-              {t('history.saveRecipe')}
-            </button>
           </>
         ) : (
           <h1>{t('history.missing')}</h1>
         )}
+        <div className="detail-footer">
+          {back}
+          {log && (
+            <button className="primary" onClick={() => onRecipe(recipeFromLog(log))}>
+              {t('history.saveRecipe')}
+            </button>
+          )}
+        </div>
       </>
     )
   }
@@ -72,6 +83,7 @@ export function BrewHistory({
           ))}
         </ol>
       )}
+      <div className="actions">{back}</div>
     </>
   )
 }

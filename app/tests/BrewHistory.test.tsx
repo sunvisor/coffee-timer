@@ -97,6 +97,10 @@ describe('brew history', () => {
     view.unmount()
     renderApp([`/logs/${log.id}`])
     expect(screen.getByRole('heading', { name: recipe.name })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '戻る' }))
+    expect(screen.getByRole('heading', { name: '抽出記録' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '戻る' }))
+    expect(screen.getByRole('heading', { name: '設定' })).toBeTruthy()
   })
 
   it('shows an empty list and explains missing or unreadable logs', async () => {
