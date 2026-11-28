@@ -118,16 +118,19 @@ export const ja = {
   'settings.title': 'レシピを、大切に。',
   'settings.local': 'レシピはこのブラウザーに保存されます。',
   'settings.backupHint': '機種変更やブラウザーのデータ削除に備えて、バックアップしておきましょう。',
-  'settings.export': 'レシピの保存',
-  'settings.exportHint': 'すべてのレシピをファイルに書き出します。',
-  'settings.download': 'ダウンロード',
-  'settings.import': 'レシピの読み込み',
-  'settings.importHint': '保存したレシピファイルを選び、追加または置き換えを選択します。',
+  'settings.export': 'ファイルに保存',
+  'settings.exportHint':
+    'すべてのレシピをまとめて保存できます（JSON形式）。別の端末に移すときにも使えます。',
+  'settings.download': '保存する',
+  'settings.import': '保存したファイルを読み込む',
+  'settings.importHint':
+    '以前保存したレシピのファイルを選んでください。今のレシピに追加するか、置き換えるかを選べます。',
   'settings.choose': 'ファイルを選択',
   'settings.file': 'レシピファイル',
   'settings.privacy': 'アカウント登録不要。レシピがサーバーへ送信されることはありません。',
   'import.large': '5 MB 以下のファイルを選択してください。',
-  'import.json': 'JSON を読み取れません。ファイルの内容を確認してください。',
+  'import.json':
+    'このファイルを読み込めませんでした。設定画面から保存したレシピのファイルを選び直してください。',
   'import.failed': 'ファイルを読み込めませんでした。',
   'import.confirm':
     '現在の {current} 件のレシピを削除し、{count} 件のレシピに置き換えます。よろしいですか？',
