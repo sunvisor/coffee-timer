@@ -1,7 +1,7 @@
 import { Markdown } from './Markdown'
 import { formatTime, totalPourAmount, totalSeconds, type Recipe } from './recipes'
 import { WaterAmountWarning } from './WaterAmountWarning'
-import { ScreenAwakeNotice } from './ScreenAwakeNotice'
+import { ScreenAwake } from './ScreenAwake'
 
 export function RecipeStats({ recipe }: { recipe: Recipe }) {
   return (
@@ -61,7 +61,7 @@ export function RecipeView({
       <section className="panel">
         <h2>淹れる前に</h2>
         <Markdown>{recipe.preparation || '器具とコーヒーを準備しましょう。'}</Markdown>
-        <ScreenAwakeNotice />
+        <ScreenAwake />
       </section>
       <section className="panel">
         <div className="section-heading">
